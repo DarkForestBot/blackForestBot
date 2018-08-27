@@ -1,0 +1,15 @@
+package basis
+
+type Language map[string]string
+type LanguageList map[string]Language
+
+var GlobalLanguageList LanguageList
+
+func init() {
+    GlobalLanguageList = make(LanguageList)
+    /*
+    LocaleLanguagefilename = Language{blah...} 
+    GlobalLanguageList[meta] = LocaleLanguage_filename
+    */
+    %SOMECODE%
+}
