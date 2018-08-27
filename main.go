@@ -25,6 +25,6 @@ func main() {
 	}
 
 	log.Printf("Bot authoirzed by name: %s(%d)", bot.Name(), bot.ID())
-	bot.RegisterProcessor(controllers.TestProcessor)
+	bot.RegisterProcessor(controllers.MessageProcessor)
 	bot.Run()
 }

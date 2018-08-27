@@ -11,7 +11,7 @@ const (
 // TgGroup is used in database
 type TgGroup struct {
 	ID        int
-	TgGroupID string `gorm:"not null"`
+	TgGroupID int64  `gorm:"unique;not null"`
 	Name      string `gorm:"not null"`
 	AdminID   int
 	Admin     User

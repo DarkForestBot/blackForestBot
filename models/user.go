@@ -3,7 +3,7 @@ package models
 // User is used in database
 type User struct {
 	ID                   int
-	TgUserID             string `gorm:"unique;not null;size:50"`
+	TgUserID             int    `gorm:"unique;not null;size:50"`
 	TgUserName           string `gorm:"not null;size:255"`
 	Name                 string `gorm:"not null"`
 	GamesJoined          int    `gorm:"default:0;not null"`
