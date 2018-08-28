@@ -6,7 +6,7 @@ const (
 	PlayerStatusNormal     = 0
 	PlayerStatusXExposed   = 1
 	PlayerStatusYExposed   = 2
-	PlayerStatusWild       = PlayerStatusYExposed
+	PlayerStatusBeast      = PlayerStatusYExposed
 	PlayerSetTrap          = true
 	PlayerUnsetTrap        = false
 	PlayerUnionBetrayed    = true

@@ -17,4 +17,5 @@ type TgGroup struct {
 	Admin     User
 	Lang      string   `gorm:"default:\"English\""`
 	Mode      GameMode `gorm:"default:0"`
+	Active    bool     `gorm:"default:1"`
 }

@@ -1,2 +1,7 @@
 meta:language=简体中文
 trans:test=测试
+trans:help=*暗黑森林* 游戏帮助\n\n命令：\n/startgame 开始游戏【群组】\n/setlang 设定语言【群组/个人】\n/flee 离开游戏【群组】\n/extend [time] 延长游戏加入时间，无有效参数默认30秒【群组】\n/stat [someone] 查看某人统计信息，无有效参数默认为自己【群组/个人】\n\n规则：\n1. 每个人会分配一个坐标`(x, y)`（这两个值为当前游戏人数的两倍），每人每晚可以向任意坐标放一枪，被打到的人就会死亡。\n2. 每次开枪都会暴露自己坐标的某一个值。\n3. 当坐标全部暴露后就会变身为野兽，野兽和人在相杀中有先手优势，即出现互杀时，野兽会生存下来。\n4. 放弃晚上的行动，将直接变身为野兽。\n5. 玩家可以选择在白天结盟，结盟只有相关的两个人知道\n6. 结盟的人放枪将不再暴露新的坐标值\n7. 玩家可以在晚上选择背叛自己的联盟，直接杀死对方，无需知道坐标\n8. 玩家可以在晚上选择设置陷阱，如果有人背叛了你，他将死亡\n9. 最后只有一位玩家可以活下来，或者全部死亡
+trans:about=*暗黑森林* 关于\n\n作者：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
+trans:startgame={{.Name}}带领大家进入了暗黑森林，开启了一场混乱的杀人派对，只有一个人可以活着出来！
+trans:join=加入
+trans:grouponly=这个命令*只能*在群组里使用.

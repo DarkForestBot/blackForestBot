@@ -3,9 +3,13 @@ package config
 import (
 	"encoding/json"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
+
+	"github.com/go-redis/redis"
 )
 
 //Config for this bot
@@ -15,13 +19,7 @@ type Config struct {
 	UpdateTimeout int    `json:"updateTimeout"`
 	Database      string `json:"database"`
 	Redis         string `json:"redis"`
-	Images        *struct {
-		Win     string `json:"win"`
-		Lose    string `json:"lose"`
-		Start   string `json:"start"`
-		Killed  string `json:"killed"`
-		Trapped string `json:"trapped"`
-	} `json:"img"`
+	AdminPassword string `json:"adminPassword"`
 }
 
 //DefaultConfig is global
@@ -44,6 +42,23 @@ func (c *Config) ReadConfig(cfgFile string) error {
 		return err
 	}
 	return nil
+}
+
+// RedisConfig to ready
+func (c *Config) RedisConfig() (*redis.Options, error) {
+	u, err := url.Parse(c.Redis)
+	if err != nil {
+		return nil, err
+	}
+	o := new(redis.Options)
+	o.Addr = u.Host
+	_, db := path.Split(u.Path)
+	dbn, err := strconv.Atoi(db)
+	if err != nil {
+		return nil, err
+	}
+	o.DB = dbn
+	return o, nil
 }
 
 func init() {

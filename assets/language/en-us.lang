@@ -1,2 +1,7 @@
 meta:language=English
 trans:test=Test
+trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from gamep \\[Group]\n/extend \\[time] Extend time of joining a game, default extends 30s. \\[Group]\n/stats \\[someone] Show stats for someone, default self \\[Group/PM]\n\nRules:\n1. Every player will get a position `(x, y)` (`x` and `y` are double of players). Every player can shoot at a position every night. Player will be killed when someone shoot at his position.\n2. Every shoot would expose one axis of his position.\n3. Player would convert to a BEAST when all axes of his position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will convert to BEAST.\n5. Two players can unite each other, only of they know.\n6. Players who join a union would not expose his position.\n7. Player can betray his union at night and kill another one, no position is needed.\n8. Player can set a trap at night, player who betrayed you will be killed\n9. Only one player live, or all DEAD
+trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
+trans:startgame={{.Name}} leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
+trans:join=Join
+trans:grouponly=This command is used in a group *ONLY*.

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/bot"
@@ -17,22 +16,22 @@ func init() {
 	commandList = make(map[string]eventFunc)
 	commandList["start"] = onStart
 	commandList["help"] = onHelp
+	commandList["startgame"] = onStartGame
 }
 
 func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {
-	var err error
 	msg := update.Message
 	if msg != nil {
-		err = checkJoinEvent(msg, bot, onJoinAChat)
-		if err != nil {
+		if err := checkJoinEvent(msg, bot, onJoinAChat); err != nil {
 			return err
 		}
-		err = checkLeaveEvent(msg, bot, onKickoutAChat)
-		if err != nil {
+		if err := checkLeaveEvent(msg, bot, onKickoutAChat); err != nil {
 			return err
 		}
-		err = checkCommandEvent(msg, bot)
-		if err != nil {
+		if err := checkAnimationEvent(msg, bot, onReceiveAnimation); err != nil {
+			return err
+		}
+		if err := checkCommandEvent(msg, bot); err != nil {
 			return err
 		}
 	}
@@ -40,11 +39,11 @@ func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {
 	if act != nil {
 		log.Println(act.Data)
 		bot.AnswerCallbackQuery(tgApi.CallbackConfig{
-			CallbackQueryID: fmt.Sprintf("ID-%s", act.ID),
+			CallbackQueryID: act.ID,
 			Text:            "Clicked.",
 		})
 	}
-	return err
+	return nil
 }
 
 func checkJoinEvent(msg *tgApi.Message, bot *bot.Bot, fn eventFunc) error {
@@ -78,6 +77,13 @@ func checkCommandEvent(msg *tgApi.Message, bot *bot.Bot) error {
 			return errors.New("No such command")
 		}
 		return fn(msg, bot, args)
+	}
+	return nil
+}
+
+func checkAnimationEvent(msg *tgApi.Message, bot *bot.Bot, fn eventFunc) error {
+	if msg.Document != nil {
+		return fn(msg)
 	}
 	return nil
 }

@@ -27,8 +27,8 @@ func TestProcessor(update tgApi.Update, bot *bot.Bot) error {
 	if act != nil {
 		log.Println(act.Data)
 		bot.AnswerCallbackQuery(tgApi.CallbackConfig{
-			CallbackQueryID: fmt.Sprintf("ID-%s", act.ID),
-			Text:            "Clicked.",
+			CallbackQueryID: act.ID,
+			URL:             fmt.Sprintf("https://t.me/%s?start=%s", bot.Name(), act.ID),
 		})
 	}
 	return err
