@@ -5,3 +5,16 @@ trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](@tonychee7000)\nGIT: [Bla
 trans:startgame={{.Name}} leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
 trans:join=Join
 trans:grouponly=This command is used in a group *ONLY*.
+trans:chatonly=This command is used in a private chat *ONLY*
+trans:badpassword=Invalid password.
+trans:adminon=Admin mode *ON*.\nTo leave admin mode, use `\admin` without any argument.
+trans:adminoff=Admin mode *OFF*.
+trans:players=#Players: {{len .}}\n{{range .}}\n[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
+trans:gamecancelled=No enough players joined, game cancelled.
+trans:gamestart=Game start!
+trans:jointime={{.}} Left! Be quick!
+trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) has joined the game.
+trans:onplayers=Here is the players joined.
+trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) has left this dangerous place.
+trans:noflee=It's too late to leave here!
+trans:setlang=Which language do you need?

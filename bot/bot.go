@@ -62,6 +62,11 @@ func (b *Bot) Send(c tgApi.Chattable) (tgApi.Message, error) {
 	return b.bot.Send(c)
 }
 
+// DeleteMessage wrapper
+func (b *Bot) DeleteMessage(config tgApi.DeleteMessageConfig) (tgApi.APIResponse, error) {
+	return b.bot.DeleteMessage(config)
+}
+
 // AnswerCallbackQuery wrapper
 func (b *Bot) AnswerCallbackQuery(c tgApi.CallbackConfig) (tgApi.APIResponse, error) {
 	return b.bot.AnswerCallbackQuery(c)

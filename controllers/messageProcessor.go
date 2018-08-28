@@ -17,6 +17,12 @@ func init() {
 	commandList["start"] = onStart
 	commandList["help"] = onHelp
 	commandList["startgame"] = onStartGame
+	commandList["admin"] = onAdmin
+	commandList["extend"] = onExtend
+	commandList["players"] = onPlayers
+	commandList["flee"] = onFlee
+	commandList["setlang"] = onSetLang
+	commandList["stats"] = onStat
 }
 
 func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {

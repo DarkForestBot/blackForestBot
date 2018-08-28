@@ -23,6 +23,13 @@ func main() {
 	}
 	log.Printf("Bot authoirzed by name: %s(%d)", bot.Name(), bot.ID())
 	bot.RegisterProcessor(controllers.MessageProcessor)
-	//bot.RegisterProcessor(controllers.TestProcessor)
+
+	go controllers.JoinContoller(
+		controllers.ChJoinTimeExtender,
+		controllers.ChGameExtender,
+		controllers.ChGameCanceller,
+		controllers.ChGameGetter,
+		controllers.ChGameRecv, bot,
+	)
 	bot.Run()
 }

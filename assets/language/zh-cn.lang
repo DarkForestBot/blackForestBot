@@ -5,3 +5,16 @@ trans:about=*暗黑森林* 关于\n\n作者：[TonyChyi](@tonychee7000)\nGIT: [B
 trans:startgame={{.Name}}带领大家进入了暗黑森林，开启了一场混乱的杀人派对，只有一个人可以活着出来！
 trans:join=加入
 trans:grouponly=这个命令*只能*在群组里使用.
+trans:chatonly=这个命令*只能*在私聊中使用.
+trans:badpassword=密码错误
+trans:adminon=管理模式 *ON*.\n使用不带任何参数的`\admin`指令关闭管理模式
+trans:adminoff=管理模式 *OFF*.
+trans:players=#Players: {{len .}}\n{{range .}}\n[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
+trans:gamecancelled=人数不足，游戏取消
+trans:gamestart=游戏开始！
+trans:jointime=游戏还有 {{.}} 可以加入，要快！
+trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) 加入了游戏
+trans:onplayers=这里是玩家名单
+trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) 离开了这个危险的地方
+trans:noflee=你在森林里迷路了，无法离开
+trans:setlang=你需要哪种语言？

@@ -4,6 +4,9 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+
+	"git.wetofu.top/tonychee7000/blackForestBot/consts"
+	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //GameStatus is
@@ -17,6 +20,12 @@ const (
 	GameIsNight             = !GameIsDay
 )
 
+type msgSent struct {
+	StartMsg    *tgApi.Message
+	PlayerList  *tgApi.Message
+	JoinTimeMsg []*tgApi.Message
+}
+
 //Game is
 type Game struct {
 	Round     int
@@ -26,6 +35,8 @@ type Game struct {
 	Positions []*Position
 	Players   []*Player
 	TgGroup   *TgGroup
+	JoinTime  int
+	MsgSent   *msgSent
 }
 
 //NewGame is to create a new game in the group
@@ -38,6 +49,8 @@ func NewGame(tg *TgGroup) *Game {
 	game.Positions = make([]*Position, 0)
 	game.Players = make([]*Player, 0)
 	game.TgGroup = tg
+	game.JoinTime = consts.TwoMinutes
+	game.MsgSent = new(msgSent)
 	return game
 }
 
