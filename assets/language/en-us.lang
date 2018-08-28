@@ -18,3 +18,10 @@ trans:onplayers=Here is the players joined.
 trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) has left this dangerous place.
 trans:noflee=It's too late to leave here!
 trans:setlang=Which language do you need?
+trans:hasgame=There has already had a game.
+trans:gamequeue=You have already in the queue of {{.}}.\nWhen game start, I will PM you!
+trans:newgame=There is a new game in {{.}}\nGo quickly!
+trans:cancel=Cancel
+trans:ok=OK
+trans:noenoughplayers=At least *6* players to start a game!
+trans:langchanged=OK! I will show message in English.

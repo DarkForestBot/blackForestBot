@@ -2,15 +2,17 @@ package controllers
 
 import (
 	"errors"
-	"log"
+	"strings"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/bot"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type eventFunc func(*tgApi.Message, ...interface{}) error
+type inlineQueryFunc func(string, *tgApi.CallbackQuery, *bot.Bot) error
 
 var commandList map[string]eventFunc
+var inlineQueryList map[string]inlineQueryFunc
 
 func init() {
 	commandList = make(map[string]eventFunc)
@@ -23,6 +25,12 @@ func init() {
 	commandList["flee"] = onFlee
 	commandList["setlang"] = onSetLang
 	commandList["stats"] = onStat
+	commandList["forcestart"] = onForceStart
+	commandList["nextgame"] = onNextGame
+	inlineQueryList = make(map[string]inlineQueryFunc)
+	inlineQueryList["setlang"] = btnSetLang
+	inlineQueryList["cancelgame"] = btnCancelGame
+
 }
 
 func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {
@@ -43,11 +51,7 @@ func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {
 	}
 	act := update.CallbackQuery
 	if act != nil {
-		log.Println(act.Data)
-		bot.AnswerCallbackQuery(tgApi.CallbackConfig{
-			CallbackQueryID: act.ID,
-			Text:            "Clicked.",
-		})
+		return inlineQueryProcessor(act, bot)
 	}
 	return nil
 }
@@ -64,7 +68,7 @@ func checkJoinEvent(msg *tgApi.Message, bot *bot.Bot, fn eventFunc) error {
 		return nil
 	}
 
-	return fn(msg)
+	return fn(msg, bot)
 }
 
 func checkLeaveEvent(msg *tgApi.Message, bot *bot.Bot, fn eventFunc) error {
@@ -92,4 +96,15 @@ func checkAnimationEvent(msg *tgApi.Message, bot *bot.Bot, fn eventFunc) error {
 		return fn(msg)
 	}
 	return nil
+}
+
+func inlineQueryProcessor(act *tgApi.CallbackQuery, bot *bot.Bot) error {
+	a := strings.SplitN(act.Data, "=", 2)
+	cmd := a[0]
+	arg := a[1]
+	fn, ok := inlineQueryList[cmd]
+	if !ok {
+		return errors.New("No such inline command")
+	}
+	return fn(arg, act, bot)
 }

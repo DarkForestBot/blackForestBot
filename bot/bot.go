@@ -72,6 +72,11 @@ func (b *Bot) AnswerCallbackQuery(c tgApi.CallbackConfig) (tgApi.APIResponse, er
 	return b.bot.AnswerCallbackQuery(c)
 }
 
+// LeaveChat wrapper
+func (b *Bot) LeaveChat(c tgApi.ChatConfig) (tgApi.APIResponse, error) {
+	return b.bot.LeaveChat(c)
+}
+
 // RegisterProcessor to reg some func.
 func (b *Bot) RegisterProcessor(fn ProceedFunc) {
 	b.procFunc = fn

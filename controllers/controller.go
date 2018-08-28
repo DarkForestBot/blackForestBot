@@ -123,3 +123,7 @@ func JoinContoller(
 		}
 	}
 }
+
+func gameController() {
+
+}

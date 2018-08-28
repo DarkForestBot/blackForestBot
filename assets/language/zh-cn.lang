@@ -18,3 +18,10 @@ trans:onplayers=这里是玩家名单
 trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) 离开了这个危险的地方
 trans:noflee=你在森林里迷路了，无法离开
 trans:setlang=你需要哪种语言？
+trans:hasgame=这里已经开始了一场游戏了
+trans:gamequeue=你已在 {{.}} 排队了\n当游戏开始时我会提醒你！
+trans:newgame={{.}}有一个新游戏\n赶快加入吧！
+trans:cancel=取消
+trans:ok=确定
+trans:noenoughplayers=至少需要*6*名玩家才能开始游戏！
+trans:langchanged=好啦！我现在会使用简体中文说话！

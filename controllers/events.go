@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/basis"
-
 	"git.wetofu.top/tonychee7000/blackForestBot/config"
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
@@ -27,8 +26,19 @@ func init() {
 }
 
 func onJoinAChat(msg *tgApi.Message, other ...interface{}) error {
+	bot, _ := messageUtils(other)
+	if bot == nil {
+		return errors.New("no bot found")
+	}
 	if msg.Chat.ID > 0 {
 		return errors.New("Bad tg group")
+	}
+	// No channel allowed.
+	if msg.Chat.Type == "channel" {
+		_, err := bot.LeaveChat(tgApi.ChatConfig{
+			ChatID: msg.Chat.ID,
+		})
+		return err
 	}
 	group := new(models.TgGroup)
 	if err := database.DB.Where(models.TgGroup{TgGroupID: msg.Chat.ID}).Assign(
@@ -129,7 +139,7 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 		ChGameGetter <- msg.Chat.ID
 		game := <-ChGameRecv
 		if game != nil && game.TgGroup.TgGroupID == msg.Chat.ID {
-			return nil
+			return markdownReply(msg.Chat.ID, "hasgame", msg, bot, nil)
 		}
 
 		game = models.NewGame(group)
@@ -273,12 +283,7 @@ func onFlee(msg *tgApi.Message, other ...interface{}) error {
 	game := <-ChGameRecv
 	if game != nil {
 		if game.Status == models.GameNotStart {
-			for i, u := range game.Users {
-				if u.ID == user.ID {
-					game.Users = append(game.Users[:i], game.Users[i+1:]...)
-					break
-				}
-			}
+			game.Flee(user)
 			return markdownMessage(msg.Chat.ID, "flee", bot, user)
 		}
 		return markdownMessage(msg.Chat.ID, "noflee", bot, nil)
@@ -320,4 +325,76 @@ func onSetLang(msg *tgApi.Message, other ...interface{}) error {
 func onStat(msg *tgApi.Message, other ...interface{}) error {
 	//TODO: stat
 	return nil
+}
+
+func onNextGame(msg *tgApi.Message, other ...interface{}) error {
+	bot, _ := messageUtils(other)
+	if bot != nil {
+		return errors.New("no bot found")
+	}
+	if msg.Chat.ID > 0 {
+		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
+	}
+	user, err := getUser(int64(msg.From.ID))
+	if err != nil {
+		return err
+	}
+	var gameQueue []int64
+	if err := database.Redis.Get(
+		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
+	).Scan(&gameQueue); err != nil {
+		return err
+	}
+	gameQueue = append(gameQueue, user.TgUserID)
+	if err := database.Redis.Set(
+		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
+		gameQueue, -1,
+	).Err(); err != nil {
+		return err
+	}
+	langSet := getLang(int64(msg.From.ID))
+	reply := tgApi.NewMessage(
+		int64(msg.From.ID),
+		lang.T(langSet, "gamequeue", msg.Chat.Title),
+	)
+	btn := tgApi.NewInlineKeyboardButtonData(
+		lang.T(langSet, "cancel", nil),
+		fmt.Sprintf("cancelgame=%d", msg.Chat.ID),
+	)
+	reply.ReplyMarkup = tgApi.NewInlineKeyboardMarkup(tgApi.NewInlineKeyboardRow(btn))
+	nmsg, err := bot.Send(reply)
+	if err != nil {
+		return err
+	}
+	var gameQueueMsg []int
+	if err := database.Redis.Get(
+		fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
+	).Scan(&gameQueueMsg); err != nil {
+		return err
+	}
+	gameQueueMsg = append(gameQueueMsg, nmsg.MessageID)
+	if err := database.Redis.Set(
+		fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
+		gameQueueMsg, -1,
+	).Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func onForceStart(msg *tgApi.Message, other ...interface{}) error {
+	bot, _ := messageUtils(other)
+	if bot == nil {
+		return errors.New("no bot found")
+	}
+	if msg.Chat.ID < 0 {
+		ChGameGetter <- msg.Chat.ID
+		game := <-ChGameRecv
+		if game != nil {
+			if err := game.Start(); err != nil {
+				return markdownMessage(msg.Chat.ID, "noenoughplayers", bot, nil)
+			}
+		}
+	}
+	return markdownMessage(msg.Chat.ID, "grouponly", bot, nil)
 }

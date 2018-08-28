@@ -13,11 +13,12 @@ import (
 type GameStatus int
 
 const (
-	GameNotStart GameStatus = 0
-	GameStart    GameStatus = 1
-	GameFinished GameStatus = 2
-	GameIsDay               = true
-	GameIsNight             = !GameIsDay
+	GameNotStart   GameStatus = 0
+	GameStart      GameStatus = 1
+	GameFinished   GameStatus = 2
+	GameIsDay                 = true
+	GameIsNight               = !GameIsDay
+	GameMinPlayers            = 6
 )
 
 type msgSent struct {
@@ -76,8 +77,7 @@ func (g *Game) Flee(user *User) {
 
 //Start is go!
 func (g *Game) Start() error {
-	userlen := len(g.Users)
-	if userlen < 6 {
+	if len(g.Users) < GameMinPlayers {
 		return errors.New("Too less users")
 	}
 	g.makePlayer()
@@ -95,7 +95,7 @@ func (g *Game) findPlayer(user *User) *Player {
 
 func (g *Game) fleeUser(user *User) {
 	for i, guser := range g.Users {
-		if guser == user {
+		if guser.ID == user.ID {
 			g.Users = append(g.Users[:i], g.Users[i+1:]...)
 		}
 	}

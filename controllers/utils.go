@@ -87,3 +87,18 @@ func joinButton(ID int64, bot *bot.Bot) tgApi.InlineKeyboardMarkup {
 	)
 	return tgApi.NewInlineKeyboardMarkup(tgApi.NewInlineKeyboardRow(joinButton))
 }
+
+func startGamePM(msg *tgApi.Message, bot *bot.Bot) error {
+	var gameQueue []int64
+	if err := database.Redis.Get(
+		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
+	).Scan(&gameQueue); err != nil {
+		return err
+	}
+	for _, i := range gameQueue {
+		langSet := getLang(i)
+		reply := tgApi.NewMessage(i, lang.T(langSet, "newgame", msg.Chat.Title))
+		bot.Send(reply)
+	}
+	return nil
+}
