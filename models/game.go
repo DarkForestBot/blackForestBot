@@ -2,16 +2,17 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
-	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //GameStatus is
 type GameStatus int
 
+//List of game status
 const (
 	GameNotStart   GameStatus = 0
 	GameStart      GameStatus = 1
@@ -22,22 +23,32 @@ const (
 )
 
 type msgSent struct {
-	StartMsg    *tgApi.Message
-	PlayerList  *tgApi.Message
-	JoinTimeMsg []*tgApi.Message
+	StartMsg     int
+	PlayerList   int
+	JoinTimeMsg  []int
+	UnionOperMsg []int
+}
+
+func newMsgSent() *msgSent {
+	m := new(msgSent)
+	m.JoinTimeMsg = make([]int, 0)
+	m.UnionOperMsg = make([]int, 0)
+	return m
 }
 
 //Game is
 type Game struct {
-	Round     int
-	IsDay     bool
-	Users     []*User
-	Status    GameStatus
-	Positions []*Position
-	Players   []*Player
-	TgGroup   *TgGroup
-	JoinTime  int
-	MsgSent   *msgSent
+	Round      int
+	IsDay      bool
+	Users      []*User
+	Status     GameStatus
+	Positions  []*Position
+	Players    []*Player
+	TgGroup    *TgGroup
+	TimeLeft   int
+	MsgSent    *msgSent
+	Operations []*Operation // Every round will clear
+	HintSent   bool
 }
 
 //NewGame is to create a new game in the group
@@ -50,8 +61,9 @@ func NewGame(tg *TgGroup) *Game {
 	game.Positions = make([]*Position, 0)
 	game.Players = make([]*Player, 0)
 	game.TgGroup = tg
-	game.JoinTime = consts.TwoMinutes
-	game.MsgSent = new(msgSent)
+	game.TimeLeft = consts.TwoMinutes
+	game.MsgSent = newMsgSent()
+	game.HintSent = false
 	return game
 }
 
@@ -81,7 +93,20 @@ func (g *Game) Start() error {
 		return errors.New("Too less users")
 	}
 	g.makePlayer()
+	g.Status = GameStart
 	return nil
+}
+
+func (g *Game) String() string {
+	return fmt.Sprintf(
+		"Game(round=%d, isday=%v, timeleft=%d, tgId=%d)",
+		g.Round, g.IsDay, g.TimeLeft, g.TgGroup.TgGroupID,
+	)
+}
+
+// AttachOperation is
+func (g *Game) AttachOperation(op *Operation) {
+	g.Operations = append(g.Operations, op)
 }
 
 func (g *Game) findPlayer(user *User) *Player {

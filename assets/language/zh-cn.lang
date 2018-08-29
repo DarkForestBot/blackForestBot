@@ -25,3 +25,13 @@ trans:cancel=取消
 trans:ok=确定
 trans:noenoughplayers=至少需要*6*名玩家才能开始游戏！
 trans:langchanged=好啦！我现在会使用简体中文说话！
+trans:userstats=*{{.Name}信息统计}*\n--------\n*获得成就*: {{.AchiveRewardedCount}}\n*加入游戏*: {{.GamesJoined}}\n*游戏胜利*: {{.GamesWon}}\n*胜率*: {{if .GamesJoined ne 0}}{{.GamesWon * 100 / .GamesJoined }}%{{else}}-{{end}}\n*开枪次数*: {{.ShootCount}}\n*背叛次数*: {{.BetrayCount}}\n*设陷阱次数*: {{.TrapCount}}\n*杀人次数*: {{.KillCount}}\n*发送结盟*: {{.UnionCount}}\n*结盟成功*: {{.UnionSuccessCount}}\n*接收结盟*: {{.BeUnionedCount}}
+trans:accept=接受
+trans:reject=拒绝
+trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) 想与你结盟，你愿意吗？
+trans:unionhint=现在你可以选择一个玩家结盟，你打算选谁呢？
+trans:skip=跳过
+trans:onday=现在是白天，各位玩家可以选择另一位玩家结盟
+trans:onnight=现在是夜晚，最残酷的时刻来临了！各位玩家，做出你的决断吧！
+trans:betray=背叛
+trans:trap=陷阱

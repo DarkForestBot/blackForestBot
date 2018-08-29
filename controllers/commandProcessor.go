@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/basis"
 	"git.wetofu.top/tonychee7000/blackForestBot/config"
@@ -19,9 +20,24 @@ import (
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+type eventFunc func(*tgApi.Message, ...interface{}) error
+
 var isAdminMode bool
+var commandList map[string]eventFunc
 
 func init() {
+	commandList = make(map[string]eventFunc)
+	commandList["start"] = onStart
+	commandList["help"] = onHelp
+	commandList["startgame"] = onStartGame
+	commandList["admin"] = onAdmin
+	commandList["extend"] = onExtend
+	commandList["players"] = onPlayers
+	commandList["flee"] = onFlee
+	commandList["setlang"] = onSetLang
+	commandList["stats"] = onStat
+	commandList["forcestart"] = onForceStart
+	commandList["nextgame"] = onNextGame
 	isAdminMode = false
 }
 
@@ -74,7 +90,7 @@ func onKickoutAChat(msg *tgApi.Message, other ...interface{}) error {
 	}
 	if group.ID != 0 {
 		group.Active = false
-		if err := database.DB.Save(group).Error; err != nil {
+		if err := group.Update(); err != nil {
 			return err
 		}
 	}
@@ -104,13 +120,16 @@ func onStart(msg *tgApi.Message, other ...interface{}) error {
 		return err
 	}
 	log.Printf("User `%s(%d)` registered.\n", user.Name, user.TgUserID)
+
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
 	if args != "" {
 		id, err := strconv.ParseInt(args, 10, 64)
 		if err != nil {
 			return err
 		}
-		ChGameGetter <- id
-		game := <-ChGameRecv
+		game := gameList[id]
 		if game != nil && game.Status == models.GameNotStart {
 			game.Join(user)
 			return markdownMessage(game.TgGroup.TgGroupID, "joingame", bot, user)
@@ -125,6 +144,9 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 	if bot == nil {
 		return errors.New("no bot found")
 	}
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
 	if msg.Chat.ID < 0 {
 		langSet := getLang(msg.Chat.ID)
 		user, err := getUser(int64(msg.From.ID))
@@ -136,14 +158,13 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 			return err
 		}
 
-		ChGameGetter <- msg.Chat.ID
-		game := <-ChGameRecv
+		game := gameList[msg.Chat.ID]
 		if game != nil && game.TgGroup.TgGroupID == msg.Chat.ID {
 			return markdownReply(msg.Chat.ID, "hasgame", msg, bot, nil)
 		}
 
 		game = models.NewGame(group)
-		ChGameExtender <- game
+		gameList[msg.Chat.ID] = game
 
 		reply := tgApi.NewDocumentShare(msg.Chat.ID, config.DefaultImages.Start)
 		reply.ReplyToMessageID = msg.MessageID
@@ -153,22 +174,21 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 
 		nmsg, err := bot.Send(reply)
 		if err != nil {
-			ChGameCanceller <- msg.Chat.ID
+			gameList[msg.Chat.ID] = nil
 			return err
 		}
-		game.MsgSent.StartMsg = &nmsg
+		game.MsgSent.StartMsg = nmsg.MessageID
 
 		playerList := tgApi.NewMessage(msg.Chat.ID, lang.T(langSet, "players", game.Users))
 		plMsg, err := bot.Send(playerList)
 		if err != nil {
-			ChGameCanceller <- msg.Chat.ID
+			gameList[msg.Chat.ID] = nil
 			return err
 		}
-		game.MsgSent.PlayerList = &plMsg
-	} else {
-		return markdownReply(int64(msg.From.ID), "grouponly", msg, bot, nil)
+		game.MsgSent.PlayerList = plMsg.MessageID
+		return startGamePM(msg, bot)
 	}
-	return nil
+	return markdownReply(int64(msg.From.ID), "grouponly", msg, bot, nil)
 }
 
 func onHelp(msg *tgApi.Message, other ...interface{}) error {
@@ -243,11 +263,25 @@ func onExtend(msg *tgApi.Message, other ...interface{}) error {
 	if err != nil {
 		eta = 30
 	}
-	et := JoinTimeExtender{
-		ChatID:     msg.Chat.ID,
-		ExtendTime: eta,
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+	langSet := getLang(msg.Chat.ID)
+	game := gameList[msg.Chat.ID]
+	game.TimeLeft += eta
+	if game.TimeLeft > 300 {
+		game.TimeLeft = 300
 	}
-	ChJoinTimeExtender <- et
+
+	nmsg := tgApi.NewMessage(msg.Chat.ID, lang.T(langSet, "jointime",
+		fmt.Sprintf("%d:%d", game.TimeLeft/60, game.TimeLeft%60),
+	))
+	nmsg.ReplyMarkup = joinButton(msg.Chat.ID, bot)
+	m, err := bot.Send(nmsg)
+	if err != nil {
+		return err
+	}
+	game.MsgSent.JoinTimeMsg = append(game.MsgSent.JoinTimeMsg, m.MessageID)
 	return nil
 }
 
@@ -259,8 +293,10 @@ func onPlayers(msg *tgApi.Message, other ...interface{}) error {
 	if msg.Chat.ID > 0 {
 		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
 	}
-	ChGameGetter <- msg.Chat.ID
-	game := <-ChGameRecv
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+	game := gameList[msg.Chat.ID]
 	if game != nil {
 		return markdownReply(msg.Chat.ID, "onplayers", msg, bot, nil)
 	}
@@ -279,8 +315,10 @@ func onFlee(msg *tgApi.Message, other ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	ChGameGetter <- msg.Chat.ID
-	game := <-ChGameRecv
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+	game := gameList[msg.Chat.ID]
 	if game != nil {
 		if game.Status == models.GameNotStart {
 			game.Flee(user)
@@ -323,8 +361,28 @@ func onSetLang(msg *tgApi.Message, other ...interface{}) error {
 }
 
 func onStat(msg *tgApi.Message, other ...interface{}) error {
-	//TODO: stat
-	return nil
+
+	bot, args := messageUtils(other)
+	if bot != nil {
+		return errors.New("no bot found")
+	}
+	var (
+		userID int64
+		err    error
+	)
+	if args == "" {
+		userID = int64(msg.From.ID)
+	} else {
+		userID, err = strconv.ParseInt(args, 10, 64)
+		if err != nil {
+			userID = int64(msg.From.ID)
+		}
+	}
+	user, err := getUser(userID)
+	if err != nil {
+		return err
+	}
+	return markdownMessage(msg.Chat.ID, "userstats", bot, user)
 }
 
 func onNextGame(msg *tgApi.Message, other ...interface{}) error {
@@ -387,9 +445,11 @@ func onForceStart(msg *tgApi.Message, other ...interface{}) error {
 	if bot == nil {
 		return errors.New("no bot found")
 	}
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
 	if msg.Chat.ID < 0 {
-		ChGameGetter <- msg.Chat.ID
-		game := <-ChGameRecv
+		game := gameList[msg.Chat.ID]
 		if game != nil {
 			if err := game.Start(); err != nil {
 				return markdownMessage(msg.Chat.ID, "noenoughplayers", bot, nil)

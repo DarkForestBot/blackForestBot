@@ -11,6 +11,16 @@ import (
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+type inlineQueryFunc func(string, *tgApi.CallbackQuery, *bot.Bot) error
+
+var inlineQueryList map[string]inlineQueryFunc
+
+func init() {
+	inlineQueryList = make(map[string]inlineQueryFunc)
+	inlineQueryList["setlang"] = btnSetLang
+	inlineQueryList["cancelgame"] = btnCancelGame
+}
+
 func btnSetLang(arg string, act *tgApi.CallbackQuery, bot *bot.Bot) error {
 	if act.Message.Chat.ID < 0 {
 		group, err := getTgGroup(act.Message.Chat.ID)
@@ -21,7 +31,7 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery, bot *bot.Bot) error {
 			return errors.New("No permission to change language")
 		}
 		group.Lang = arg
-		if err := database.DB.Save(group).Error; err != nil {
+		if err := group.Update(); err != nil {
 			return err
 		}
 		if err := database.Redis.Set(
@@ -42,7 +52,7 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery, bot *bot.Bot) error {
 			return err
 		}
 		user.Language = arg
-		if err := database.DB.Save(user).Error; err != nil {
+		if err := user.Update(); err != nil {
 			return err
 		}
 		if err := database.Redis.Set(

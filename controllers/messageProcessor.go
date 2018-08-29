@@ -8,31 +8,7 @@ import (
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type eventFunc func(*tgApi.Message, ...interface{}) error
-type inlineQueryFunc func(string, *tgApi.CallbackQuery, *bot.Bot) error
-
-var commandList map[string]eventFunc
-var inlineQueryList map[string]inlineQueryFunc
-
-func init() {
-	commandList = make(map[string]eventFunc)
-	commandList["start"] = onStart
-	commandList["help"] = onHelp
-	commandList["startgame"] = onStartGame
-	commandList["admin"] = onAdmin
-	commandList["extend"] = onExtend
-	commandList["players"] = onPlayers
-	commandList["flee"] = onFlee
-	commandList["setlang"] = onSetLang
-	commandList["stats"] = onStat
-	commandList["forcestart"] = onForceStart
-	commandList["nextgame"] = onNextGame
-	inlineQueryList = make(map[string]inlineQueryFunc)
-	inlineQueryList["setlang"] = btnSetLang
-	inlineQueryList["cancelgame"] = btnCancelGame
-
-}
-
+//MessageProcessor is
 func MessageProcessor(update tgApi.Update, bot *bot.Bot) error {
 	msg := update.Message
 	if msg != nil {
@@ -106,5 +82,12 @@ func inlineQueryProcessor(act *tgApi.CallbackQuery, bot *bot.Bot) error {
 	if !ok {
 		return errors.New("No such inline command")
 	}
-	return fn(arg, act, bot)
+	if err := fn(arg, act, bot); err != nil {
+		return err
+	}
+	if _, err := bot.AnswerCallbackQuery(
+		tgApi.CallbackConfig{CallbackQueryID: act.ID}); err != nil {
+		return err
+	}
+	return nil
 }

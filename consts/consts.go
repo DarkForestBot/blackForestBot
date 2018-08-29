@@ -1,6 +1,7 @@
 package consts
 
 const (
+	OneMinute                = 60
 	TwoMinutes               = 120
 	FiveMinutes              = 300
 	LangSetFormatString      = "LangSet:ID:%d"

@@ -3,79 +3,52 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/bot"
+	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//JoinTimeExtender is
 type JoinTimeExtender struct {
 	ChatID     int64
 	ExtendTime int
 }
 
 var gameList map[int64]*models.Game
-var ChJoinTimeExtender chan JoinTimeExtender
-var ChGameExtender chan *models.Game
-var ChGameCanceller chan int64
-var ChGameGetter chan int64
-var ChGameRecv chan *models.Game
 
 func init() {
 	gameList = make(map[int64]*models.Game)
-	ChJoinTimeExtender = make(chan JoinTimeExtender)
-	ChGameExtender = make(chan *models.Game)
-	ChGameCanceller = make(chan int64)
-	ChGameGetter = make(chan int64)
-	ChGameRecv = make(chan *models.Game)
 }
 
-func JoinContoller(
-	chJoinTimeExtender chan JoinTimeExtender,
-	chGameExtender chan *models.Game,
-	chGameCanceller chan int64,
-	chGameGetter chan int64,
-	chGameRecv chan *models.Game,
-	bot *bot.Bot) {
+//JoinContoller is
+func JoinContoller(bot *bot.Bot) {
 	log.Println("JoinController run.")
 	for {
 		select {
-		case c := <-chJoinTimeExtender:
-			langSet := getLang(c.ChatID)
-			game := gameList[c.ChatID]
-			game.JoinTime += c.ExtendTime
-			if game.JoinTime > 300 {
-				game.JoinTime = 300
-			}
-			msg := tgApi.NewMessage(c.ChatID, lang.T(langSet, "jointime",
-				fmt.Sprintf("%d:%d", game.JoinTime/60, game.JoinTime%60),
-			))
-			msg.ReplyMarkup = joinButton(c.ChatID, bot)
-			m, err := bot.Send(msg)
-			if err != nil {
-				log.Println("ERROR:", err)
-				continue
-			}
-			game.MsgSent.JoinTimeMsg = append(game.MsgSent.JoinTimeMsg, &m)
 		case <-time.Tick(time.Second):
 			for k, v := range gameList {
 				if v == nil {
 					continue
 				}
-				if v.JoinTime > 0 && v.Status == models.GameNotStart {
-					v.JoinTime--
+				var lock sync.Mutex
+				lock.Lock()
+				if v.TimeLeft > 0 && v.Status == models.GameNotStart {
+					v.TimeLeft--
 				}
 				langSet := getLang(k)
-				switch v.JoinTime {
+				switch v.TimeLeft {
 				case 60:
 					fallthrough
 				case 30:
 					fallthrough
 				case 10:
 					msg := tgApi.NewMessage(k, lang.T(langSet, "jointime",
-						fmt.Sprintf("%d:%d", v.JoinTime/60, v.JoinTime%60),
+						fmt.Sprintf("%d:%d", v.TimeLeft/60, v.TimeLeft%60),
 					))
 					msg.ReplyMarkup = joinButton(k, bot)
 					m, err := bot.Send(msg)
@@ -83,7 +56,7 @@ func JoinContoller(
 						log.Println("ERROR:", err)
 						continue
 					}
-					gameList[k].MsgSent.JoinTimeMsg = append(gameList[k].MsgSent.JoinTimeMsg, &m)
+					gameList[k].MsgSent.JoinTimeMsg = append(gameList[k].MsgSent.JoinTimeMsg, m.MessageID)
 
 				case 0:
 					if v.Status != models.GameNotStart {
@@ -93,37 +66,103 @@ func JoinContoller(
 					m1 := tgApi.EditMessageReplyMarkupConfig{
 						BaseEdit: tgApi.BaseEdit{
 							ChatID:      k,
-							MessageID:   msgSent.StartMsg.MessageID,
+							MessageID:   msgSent.StartMsg,
 							ReplyMarkup: nil,
 						},
 					}
 					bot.Send(m1)
 					for _, n := range msgSent.JoinTimeMsg {
-						m := tgApi.NewDeleteMessage(k, n.MessageID)
+						m := tgApi.NewDeleteMessage(k, n)
 						bot.DeleteMessage(m)
 					}
 
 					err := v.Start()
 					if err != nil {
+						log.Println(v, "not start for timed out.")
 						v = nil
 						msg := tgApi.NewMessage(k, lang.T(langSet, "gamecancelled", nil))
 						bot.Send(msg)
 						log.Println("ERROR:", err)
+						continue
 					}
 					msg := tgApi.NewMessage(k, lang.T(langSet, "gamestart", nil))
 					bot.Send(msg)
 				}
+				lock.Unlock()
 			}
-		case <-time.Tick(10 * time.Second):
+		case <-time.Tick(5 * time.Second):
 			for k, v := range gameList {
 				langSet := getLang(k)
-				update := tgApi.NewEditMessageText(k, v.MsgSent.PlayerList.MessageID, lang.T(langSet, "players", v.Users))
+				update := tgApi.NewEditMessageText(k, v.MsgSent.PlayerList, lang.T(langSet, "players", v.Users))
 				bot.Send(update)
 			}
 		}
 	}
 }
 
-func gameController() {
-
+//GameController is
+func GameController(bot *bot.Bot) {
+	log.Println("GameController run.")
+	for {
+		select {
+		case <-time.Tick(time.Second):
+			var lock sync.Mutex
+			lock.Lock()
+			for _, game := range gameList {
+				if game != nil && game.Status == models.GameStart && game.TimeLeft > 0 {
+					game.TimeLeft--
+				}
+			}
+			lock.Unlock()
+		default:
+			var lock sync.Mutex
+			lock.Lock()
+			for _, game := range gameList {
+				if game != nil {
+					if game.Status == models.GameStart {
+						livePlayers := make([]*models.Player, 0)
+						for _, player := range game.Players {
+							if player.Live {
+								livePlayers = append(livePlayers, player)
+							}
+						}
+						if len(livePlayers) == 1 {
+							//Someone win
+						} else if len(livePlayers) == 0 {
+							//All dead
+						}
+						if game.IsDay == models.GameIsDay {
+							if game.TimeLeft <= 0 {
+								game.IsDay = models.GameIsNight
+								game.HintSent = true
+								game.TimeLeft = consts.OneMinute
+								//disable all day operation
+							}
+							if !game.HintSent {
+								//send playerlist and union hint
+								unionHint(game, bot)
+								game.HintSent = true
+							}
+						} else {
+							if game.TimeLeft <= 0 || len(game.Operations) == len(livePlayers) {
+								gameLogic(game)
+								//send result
+								game.IsDay = models.GameIsDay
+								game.TimeLeft = consts.TwoMinutes
+								game.HintSent = false
+								game.Round++
+							}
+							if !game.HintSent {
+								game.HintSent = true
+							}
+							//send night hint
+						}
+					} else if game.Status == models.GameFinished {
+						game = nil
+					}
+				}
+			}
+			lock.Unlock()
+		}
+	}
 }

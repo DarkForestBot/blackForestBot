@@ -43,19 +43,11 @@ func getLang(ID int64) string {
 }
 
 func getUser(ID int64) (*models.User, error) {
-	user := new(models.User)
-	if err := database.DB.Where(models.User{TgUserID: ID}).First(user).Error; err != nil {
-		return nil, err
-	}
-	return user, nil
+	return models.GetUser(ID)
 }
 
 func getTgGroup(ID int64) (*models.TgGroup, error) {
-	group := new(models.TgGroup)
-	if err := database.DB.Where(models.TgGroup{TgGroupID: ID}).First(group).Error; err != nil {
-		return nil, err
-	}
-	return group, nil
+	return models.GetTgGroup(ID)
 }
 
 func markdownReply(ID int64, key string, msg *tgApi.Message, bot *bot.Bot, other interface{}) error {

@@ -5,10 +5,12 @@ import "fmt"
 //PlayerAction is
 type PlayerAction int
 
+//List of player actions
 const (
-	GiveUp PlayerAction = 2
 	Shoot  PlayerAction = 0
-	Abort  PlayerAction = 1
+	Abort  PlayerAction = 1 // No action or timed out.
+	Trap   PlayerAction = 2
+	Betray PlayerAction = 3
 )
 
 //Operation is
