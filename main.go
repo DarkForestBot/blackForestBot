@@ -17,8 +17,7 @@ func main() {
 	defer database.DB.Close()
 	defer database.Redis.Close()
 	bot := bot.NewBot()
-	err := bot.Connect(config.DefaultConfig)
-	if err != nil {
+	if err := bot.Connect(config.DefaultConfig); err != nil {
 		log.Fatalln("FATAL:", err)
 	}
 	log.Printf("Bot authoirzed by name: %s(%d)", bot.Name(), bot.ID())

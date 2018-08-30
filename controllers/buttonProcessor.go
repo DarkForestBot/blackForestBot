@@ -68,7 +68,10 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery, bot *bot.Bot) error {
 			return err
 		}
 	}
-	return markdownMessage(act.Message.Chat.ID, "langchanged", bot, nil)
+	if _, err := markdownMessage(act.Message.Chat.ID, "langchanged", bot, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func btnCancelGame(arg string, act *tgApi.CallbackQuery, bot *bot.Bot) error {

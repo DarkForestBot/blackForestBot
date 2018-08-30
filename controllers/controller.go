@@ -127,9 +127,15 @@ func GameController(bot *bot.Bot) {
 							}
 						}
 						if len(livePlayers) == 1 {
-							//Someone win
+							if err := winHint(game, livePlayers[0], bot); err != nil {
+								log.Println("ERROR:", err)
+							}
+							game.Status = models.GameOver
 						} else if len(livePlayers) == 0 {
-							//All dead
+							if err := loseHint(game, bot); err != nil {
+								log.Println("ERROR:", err)
+							}
+							game.Status = models.GameOver
 						}
 						if game.IsDay == models.GameIsDay {
 							if game.TimeLeft <= 0 {
@@ -157,7 +163,7 @@ func GameController(bot *bot.Bot) {
 							}
 							//send night hint
 						}
-					} else if game.Status == models.GameFinished {
+					} else if game.Status == models.GameOver {
 						game = nil
 					}
 				}

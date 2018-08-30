@@ -35,3 +35,6 @@ trans:onday=现在是白天，各位玩家可以选择另一位玩家结盟
 trans:onnight=现在是夜晚，最残酷的时刻来临了！各位玩家，做出你的决断吧！
 trans:betray=背叛
 trans:trap=陷阱
+trans:win={{.Name}} 活着走出了森林，然而其他人……
+trans:lose=森林归于寂静，无人生还
+*第 {{.Round}} 天*\n-----\n{{range .Players}}\n[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) {{.GetPositionString}} {{if eq .Status 2}}👹野兽{{else}}🙂人类{{end}} {{if .Live}}幸存{{else}}死亡{{end}}\n{{end}}

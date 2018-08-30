@@ -46,6 +46,7 @@ func (b *Bot) Connect(conf config.Config) error {
 
 // Run to proceed
 func (b *Bot) Run() {
+	go messageManager()
 	for {
 		select {
 		case update := <-b.updatesChannel:

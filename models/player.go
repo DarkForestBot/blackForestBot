@@ -50,14 +50,14 @@ type Player struct {
 	Position     *Position // two-way bond
 	Unioned      *Player
 	Grouped      *Group
-	Job          *Job //TODO: soon tm
+	Role         *Role //TODO: soon tm
 	Status       int
 	TrapSet      bool
 	ShootX       int // Every round clear
 	ShootY       int // Every round clear
 	UnionReqs    []int
-	KilledBy     *Player // Will be killed by whom
 	Target       *Player // Will kill whom
+	HintBeast    bool
 }
 
 //NewPlayer is called when start a game
@@ -97,6 +97,7 @@ func (p *Player) Kill(reason PlayerKilledReason) {
 	}
 	p.Live = PlayerDead
 	p.KilledReason = reason
+	PlayerKillHint <- p
 	log.Printf("Player(%s) Killed for reason `%s`.\n", p.User.Name, reasonStrings[reason])
 }
 
@@ -108,15 +109,17 @@ func (p *Player) Shoot(betray bool, pos *Position) *Operation {
 	return NewOperation(p, Shoot, pos)
 }
 
+//Abort is
+func (p *Player) Abort() *Operation {
+	return NewOperation(p, Abort, nil)
+}
+
 // ActionClear is
 func (p *Player) ActionClear() {
 	p.ShootX = PlayerShootNone
 	p.ShootY = PlayerShootNone
 	p.TrapSet = false
 	p.Target = nil
-	if p.Status == PlayerStatusBeast {
-		p.KilledBy = nil
-	}
 }
 
 // StatusChange is
@@ -128,6 +131,10 @@ func (p *Player) StatusChange(stage ...int) {
 	}
 	if p.Status >= PlayerStatusBeast {
 		p.Status = PlayerStatusBeast
+		if !p.HintBeast {
+			PlayerBeastHint <- p
+			p.HintBeast = true
+		}
 	}
 }
 
@@ -142,4 +149,17 @@ func (p *Player) GetPositionString() string {
 		return fmt.Sprintf("(%d, %d)", p.Position.X, p.Position.Y)
 	}
 	return ""
+}
+
+// UnionValidation is
+func (p *Player) UnionValidation() bool {
+	defer func() { recover() }()
+	return p.Unioned != nil && p.Unioned.Unioned != nil && p.Unioned.Unioned == p
+}
+
+//UnionCorrection is
+func (p *Player) UnionCorrection() {
+	if !p.UnionValidation() {
+		p.Ununion()
+	}
 }

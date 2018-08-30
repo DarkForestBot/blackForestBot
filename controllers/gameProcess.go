@@ -5,18 +5,32 @@ import (
 	"log"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/bot"
+	"git.wetofu.top/tonychee7000/blackForestBot/config"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+func winHint(game *models.Game, winner *models.Player, bot *bot.Bot) error {
+	winner.User.GamesWon++
+	winner.User.Update()
+	if _, err := gifMessage(game.TgGroup.TgGroupID, "wine", config.DefaultImages.Win, bot, winner.User); err != nil {
+		return err
+	}
+	return nil
+}
+
+func loseHint(game *models.Game, bot *bot.Bot) error {
+	if _, err := gifMessage(game.TgGroup.TgGroupID, "lose", config.DefaultImages.Lose, bot, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
 func unionHint(game *models.Game, bot *bot.Bot) {
 	for _, player := range game.Players {
 		if player.Live == models.PlayerLive &&
 			(player.Unioned == nil || player.Unioned.Live == models.PlayerDead) {
-			langSet := getLang(player.User.TgUserID)
-			msg := tgApi.NewMessage(player.User.TgUserID, lang.T(langSet, "unionhint", nil))
-			msg.ParseMode = tgApi.ModeMarkdown
 			var btns [][]tgApi.InlineKeyboardButton = make([][]tgApi.InlineKeyboardButton, 0)
 			for _, playerB := range game.Players {
 				if playerB != player && playerB.Live == models.PlayerLive &&
@@ -31,6 +45,7 @@ func unionHint(game *models.Game, bot *bot.Bot) {
 					)
 				}
 			}
+			langSet := getLang(player.User.TgUserID)
 			btns = append(btns,
 				[]tgApi.InlineKeyboardButton{
 					tgApi.NewInlineKeyboardButtonData(
@@ -38,8 +53,12 @@ func unionHint(game *models.Game, bot *bot.Bot) {
 					),
 				},
 			)
-			msg.ReplyMarkup = btns
-			nmsg, err := bot.Send(msg)
+			nmsg, err := markdownMessage(
+				player.User.TgUserID, "unionhint", bot, nil,
+				tgApi.InlineKeyboardMarkup{
+					InlineKeyboard: btns,
+				},
+			)
 			if err != nil {
 				log.Println("ERROR:", err)
 			}
@@ -50,8 +69,6 @@ func unionHint(game *models.Game, bot *bot.Bot) {
 
 func sendUnionRequest(from, to *models.Player, bot *bot.Bot) error {
 	langSet := getLang(to.User.TgUserID)
-	msg := tgApi.NewMessage(to.User.TgUserID, lang.T(langSet, "unionreq", from.User))
-	msg.ParseMode = tgApi.ModeMarkdown
 	btnAccept := tgApi.NewInlineKeyboardButtonData(
 		lang.T(langSet, "accept", nil),
 		fmt.Sprintf("unionaccept=%d", from.User.TgUserID),
@@ -60,10 +77,12 @@ func sendUnionRequest(from, to *models.Player, bot *bot.Bot) error {
 		lang.T(langSet, "reject", nil),
 		"unionaccept=",
 	)
-	msg.ReplyMarkup = tgApi.NewInlineKeyboardMarkup(
-		tgApi.NewInlineKeyboardRow(btnAccept, btnReject),
+	nmsg, err := markdownMessage(
+		to.User.TgUserID, "unionreq", bot, from.User,
+		tgApi.NewInlineKeyboardMarkup(
+			tgApi.NewInlineKeyboardRow(btnAccept, btnReject),
+		),
 	)
-	nmsg, err := bot.Send(msg)
 	if err != nil {
 		return err
 	}

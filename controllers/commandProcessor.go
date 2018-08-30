@@ -132,7 +132,9 @@ func onStart(msg *tgApi.Message, other ...interface{}) error {
 		game := gameList[id]
 		if game != nil && game.Status == models.GameNotStart {
 			game.Join(user)
-			return markdownMessage(game.TgGroup.TgGroupID, "joingame", bot, user)
+			if _, err := markdownMessage(game.TgGroup.TgGroupID, "joingame", bot, user); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -148,7 +150,6 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 	lock.Lock()
 	defer lock.Unlock()
 	if msg.Chat.ID < 0 {
-		langSet := getLang(msg.Chat.ID)
 		user, err := getUser(int64(msg.From.ID))
 		if err != nil {
 			return err
@@ -160,27 +161,25 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 
 		game := gameList[msg.Chat.ID]
 		if game != nil && game.TgGroup.TgGroupID == msg.Chat.ID {
-			return markdownReply(msg.Chat.ID, "hasgame", msg, bot, nil)
+			if _, err := markdownReply(msg.Chat.ID, "hasgame", msg, bot, nil); err != nil {
+				return err
+			}
 		}
 
 		game = models.NewGame(group)
 		gameList[msg.Chat.ID] = game
 
-		reply := tgApi.NewDocumentShare(msg.Chat.ID, config.DefaultImages.Start)
-		reply.ReplyToMessageID = msg.MessageID
-		reply.Caption = lang.T(langSet, "startgame", user)
-		reply.MimeType = "video/mp4"
-		reply.ReplyMarkup = joinButton(msg.Chat.ID, bot)
-
-		nmsg, err := bot.Send(reply)
+		nmsg, err := gifMessageReply(
+			msg.Chat.ID, "startgame", config.DefaultImages.Start,
+			msg, bot, user, joinButton(msg.Chat.ID, bot),
+		)
 		if err != nil {
 			gameList[msg.Chat.ID] = nil
 			return err
 		}
 		game.MsgSent.StartMsg = nmsg.MessageID
 
-		playerList := tgApi.NewMessage(msg.Chat.ID, lang.T(langSet, "players", game.Users))
-		plMsg, err := bot.Send(playerList)
+		plMsg, err := markdownMessage(msg.Chat.ID, "players", bot, game.Users)
 		if err != nil {
 			gameList[msg.Chat.ID] = nil
 			return err
@@ -188,7 +187,10 @@ func onStartGame(msg *tgApi.Message, other ...interface{}) error {
 		game.MsgSent.PlayerList = plMsg.MessageID
 		return startGamePM(msg, bot)
 	}
-	return markdownReply(int64(msg.From.ID), "grouponly", msg, bot, nil)
+	if _, err := markdownReply(int64(msg.From.ID), "grouponly", msg, bot, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func onHelp(msg *tgApi.Message, other ...interface{}) error {
@@ -197,9 +199,15 @@ func onHelp(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID < 0 {
-		return markdownReply(int64(msg.Chat.ID), "help", msg, bot, nil)
+		if _, err := markdownReply(int64(msg.Chat.ID), "help", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
-	return markdownReply(int64(msg.From.ID), "help", msg, bot, nil)
+	if _, err := markdownReply(int64(msg.From.ID), "help", msg, bot, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func onReceiveAnimation(msg *tgApi.Message, other ...interface{}) error {
@@ -238,16 +246,28 @@ func onAdmin(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID < 0 {
-		return markdownReply(msg.Chat.ID, "chatonly", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "chatonly", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	if args == "" {
 		isAdminMode = false
-		return markdownReply(int64(msg.From.ID), "adminoff", msg, bot, nil)
+		if _, err := markdownReply(int64(msg.From.ID), "adminoff", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	} else if args == config.DefaultConfig.AdminPassword {
 		isAdminMode = true
-		return markdownReply(int64(msg.From.ID), "adminon", msg, bot, nil)
+		if _, err := markdownReply(int64(msg.From.ID), "adminon", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	} else {
-		return markdownReply(int64(msg.From.ID), "padpassword", msg, bot, nil)
+		if _, err := markdownReply(int64(msg.From.ID), "padpassword", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 }
 
@@ -257,7 +277,10 @@ func onExtend(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID > 0 {
-		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	eta, err := strconv.Atoi(args)
 	if err != nil {
@@ -291,14 +314,20 @@ func onPlayers(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID > 0 {
-		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	var lock sync.Mutex
 	lock.Lock()
 	defer lock.Unlock()
 	game := gameList[msg.Chat.ID]
 	if game != nil {
-		return markdownReply(msg.Chat.ID, "onplayers", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "onplayers", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	return nil
 }
@@ -309,7 +338,10 @@ func onFlee(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID > 0 {
-		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	user, err := getUser(int64(msg.From.ID))
 	if err != nil {
@@ -322,9 +354,15 @@ func onFlee(msg *tgApi.Message, other ...interface{}) error {
 	if game != nil {
 		if game.Status == models.GameNotStart {
 			game.Flee(user)
-			return markdownMessage(msg.Chat.ID, "flee", bot, user)
+			if _, err := markdownMessage(msg.Chat.ID, "flee", bot, user); err != nil {
+				return err
+			}
+			return nil
 		}
-		return markdownMessage(msg.Chat.ID, "noflee", bot, nil)
+		if _, err := markdownMessage(msg.Chat.ID, "noflee", bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	return nil
 }
@@ -334,14 +372,7 @@ func onSetLang(msg *tgApi.Message, other ...interface{}) error {
 	if bot != nil {
 		return errors.New("no bot found")
 	}
-	var langSet string
-	if msg.Chat.ID > 0 {
-		langSet = getLang(int64(msg.From.ID))
-	} else if msg.Chat.ID < 0 {
-		langSet = getLang(int64(msg.Chat.ID))
-	}
 
-	reply := tgApi.NewMessage(msg.Chat.ID, lang.T(langSet, "setlang", nil))
 	btns := make([]tgApi.InlineKeyboardButton, 0)
 	for l := range basis.GlobalLanguageList {
 		btns = append(btns, tgApi.NewInlineKeyboardButtonData(l, "setlang="+l))
@@ -354,9 +385,15 @@ func onSetLang(msg *tgApi.Message, other ...interface{}) error {
 			mk.InlineKeyboard = append(mk.InlineKeyboard, btns[i:i+2])
 		}
 	}
-	reply.ReplyMarkup = mk
-	reply.ReplyToMessageID = msg.MessageID
-	bot.Send(reply)
+	if msg.Chat.ID > 0 {
+		if _, err := markdownReply(int64(msg.From.ID), "setlang", msg, bot, nil, mk); err != nil {
+			return err
+		}
+	} else if msg.Chat.ID < 0 {
+		if _, err := markdownReply(msg.Chat.ID, "setlang", msg, bot, nil, mk); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -382,7 +419,10 @@ func onStat(msg *tgApi.Message, other ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	return markdownMessage(msg.Chat.ID, "userstats", bot, user)
+	if _, err := markdownMessage(msg.Chat.ID, "userstats", bot, user); err != nil {
+		return err
+	}
+	return nil
 }
 
 func onNextGame(msg *tgApi.Message, other ...interface{}) error {
@@ -391,7 +431,10 @@ func onNextGame(msg *tgApi.Message, other ...interface{}) error {
 		return errors.New("no bot found")
 	}
 	if msg.Chat.ID > 0 {
-		return markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil)
+		if _, err := markdownReply(msg.Chat.ID, "grouponly", msg, bot, nil); err != nil {
+			return err
+		}
+		return nil
 	}
 	user, err := getUser(int64(msg.From.ID))
 	if err != nil {
@@ -452,9 +495,15 @@ func onForceStart(msg *tgApi.Message, other ...interface{}) error {
 		game := gameList[msg.Chat.ID]
 		if game != nil {
 			if err := game.Start(); err != nil {
-				return markdownMessage(msg.Chat.ID, "noenoughplayers", bot, nil)
+				if _, err := markdownMessage(msg.Chat.ID, "noenoughplayers", bot, nil); err != nil {
+					return err
+				}
+				return nil
 			}
 		}
 	}
-	return markdownMessage(msg.Chat.ID, "grouponly", bot, nil)
+	if _, err := markdownMessage(msg.Chat.ID, "grouponly", bot, nil); err != nil {
+		return err
+	}
+	return nil
 }

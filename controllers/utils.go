@@ -50,25 +50,50 @@ func getTgGroup(ID int64) (*models.TgGroup, error) {
 	return models.GetTgGroup(ID)
 }
 
-func markdownReply(ID int64, key string, msg *tgApi.Message, bot *bot.Bot, other interface{}) error {
+func markdownReply(ID int64, key string, msg *tgApi.Message, bot *bot.Bot, other interface{}, mk ...tgApi.InlineKeyboardMarkup) (tgApi.Message, error) {
 	langSet := getLang(ID)
 	reply := tgApi.NewMessage(msg.Chat.ID, lang.T(langSet, key, other))
 	reply.ReplyToMessageID = msg.MessageID
 	reply.ParseMode = tgApi.ModeMarkdown
-	if _, err := bot.Send(reply); err != nil {
-		return err
+	if mk != nil && len(mk) == 1 {
+		reply.ReplyMarkup = mk[0]
 	}
-	return nil
+	return bot.Send(reply)
 }
 
-func markdownMessage(ID int64, key string, bot *bot.Bot, other interface{}) error {
+func markdownMessage(ID int64, key string, bot *bot.Bot, other interface{}, mk ...tgApi.InlineKeyboardMarkup) (tgApi.Message, error) {
 	langSet := getLang(ID)
 	reply := tgApi.NewMessage(ID, lang.T(langSet, key, other))
 	reply.ParseMode = tgApi.ModeMarkdown
-	if _, err := bot.Send(reply); err != nil {
-		return err
+	if mk != nil && len(mk) == 1 {
+		reply.ReplyMarkup = mk[0]
 	}
-	return nil
+	return bot.Send(reply)
+}
+
+func gifMessageReply(ID int64, key string, image string, msg *tgApi.Message, bot *bot.Bot, other interface{}, mk ...tgApi.InlineKeyboardMarkup) (tgApi.Message, error) {
+	langSet := getLang(ID)
+	reply := tgApi.NewDocumentShare(ID, image)
+	reply.Caption = lang.T(langSet, key, other)
+	reply.MimeType = "video/mp4"
+	reply.ParseMode = tgApi.ModeMarkdown
+	reply.ReplyToMessageID = msg.MessageID
+	if mk != nil && len(mk) == 1 {
+		reply.ReplyMarkup = mk[0]
+	}
+	return bot.Send(reply)
+}
+
+func gifMessage(ID int64, key string, image string, bot *bot.Bot, other interface{}, mk ...tgApi.InlineKeyboardMarkup) (tgApi.Message, error) {
+	langSet := getLang(ID)
+	reply := tgApi.NewDocumentShare(ID, image)
+	reply.Caption = lang.T(langSet, key, other)
+	reply.MimeType = "video/mp4"
+	reply.ParseMode = tgApi.ModeMarkdown
+	if mk != nil && len(mk) == 1 {
+		reply.ReplyMarkup = mk[0]
+	}
+	return bot.Send(reply)
 }
 
 func joinButton(ID int64, bot *bot.Bot) tgApi.InlineKeyboardMarkup {
@@ -88,9 +113,7 @@ func startGamePM(msg *tgApi.Message, bot *bot.Bot) error {
 		return err
 	}
 	for _, i := range gameQueue {
-		langSet := getLang(i)
-		reply := tgApi.NewMessage(i, lang.T(langSet, "newgame", msg.Chat.Title))
-		bot.Send(reply)
+		markdownMessage(i, "newgame", bot, msg.Chat.Title)
 	}
 	return nil
 }

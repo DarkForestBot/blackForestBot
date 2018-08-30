@@ -25,7 +25,7 @@ trans:cancel=Cancel
 trans:ok=OK
 trans:noenoughplayers=At least *6* players to start a game!
 trans:langchanged=OK! I will show message in English.
-trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{if .GamesJoined ne 0}}{{.GamesWon * 100 / .GamesJoined }}%{{else}}-{{end}}\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Kill Count*: {{.KillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
+trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{if ne .GamesJoined 0}}{{.GamesWon * 100 / .GamesJoined }}%{{else}}-{{end}}\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Kill Count*: {{.KillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
 trans:accept=Accept
 trans:reject=Reject
 trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna be union with you. Do you want to accept with it?
@@ -35,3 +35,6 @@ trans:onday=Now is day and every player can choose another one for a union. Go a
 trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!
 trans:betray=Betray
 trans:trap=Trap
+trans:win=[{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
+trans:lose=Oops! NO ONE live
+trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}\n[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) {{.GetPositionString}} {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
