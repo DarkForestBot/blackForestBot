@@ -42,6 +42,7 @@ func newMsgSent() *msgSent {
 type Game struct {
 	Round      int
 	IsDay      bool
+	Founder    *User
 	Users      []*User
 	Status     GameStatus
 	Positions  []*Position
@@ -52,12 +53,12 @@ type Game struct {
 	Operations []*Operation // Every round will clear
 	Cron       *cron.Cron
 	Winner     *Player
-	checkList  []*Player
 }
 
 //NewGame is to create a new game in the group
-func NewGame(tg *TgGroup) *Game {
+func NewGame(tg *TgGroup, founder *User) *Game {
 	game := new(Game)
+	game.Founder = founder
 	game.Round = 0
 	game.IsDay = GameIsDay
 	game.Users = make([]*User, 0)
@@ -67,7 +68,6 @@ func NewGame(tg *TgGroup) *Game {
 	game.TgGroup = tg
 	game.TimeLeft = consts.TwoMinutes
 	game.MsgSent = newMsgSent()
-	game.checkList = make([]*Player, 0)
 
 	game.Cron = cron.New()
 	game.Cron.AddFunc("@every 1s", game.RunCheck)
@@ -76,6 +76,21 @@ func NewGame(tg *TgGroup) *Game {
 
 	NewGameHint <- game
 	return game
+}
+
+//Extend is to extend join time
+func (g *Game) Extend(timeSecond int) {
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+
+	if g.Status == GameNotStart {
+		g.TimeLeft += timeSecond
+		if g.TimeLeft >= consts.FiveMinutes {
+			g.TimeLeft = consts.FiveMinutes
+		}
+	}
+	JoinTimeLeftHint <- g
 }
 
 //Join is add user to game
@@ -101,10 +116,7 @@ func (g *Game) Flee(user *User) {
 		g.fleeUser(user)
 		GameFleeHint <- user
 	case GameStart:
-		p := g.findPlayer(user)
-		if p != nil {
-			p.Kill(Flee)
-		}
+		GameNoFleeHint <- user
 	}
 }
 
@@ -115,6 +127,9 @@ func (g *Game) Start() error {
 	}
 	g.makePlayer()
 	g.Status = GameStart
+	g.TimeLeft = consts.TwoMinutes
+	g.IsDay = GameIsDay
+	g.Round = 1 // First day
 	return nil
 }
 
@@ -145,11 +160,17 @@ func (g *Game) GetPlayer(tgUserID int64) *Player {
 			return player
 		}
 	}
+	return nil
 }
 
 // AttachOperation is
 func (g *Game) AttachOperation(op *Operation) {
 	g.Operations = append(g.Operations, op)
+}
+
+//HintPlayers is called by command /players
+func (g *Game) HintPlayers() {
+	GetPlayersHint <- g
 }
 
 // RunCheck is
@@ -207,10 +228,12 @@ func (g *Game) gameTimeCheck() {
 	//Step III: check and change phase
 	if g.IsDay {
 		g.IsDay = GameIsNight
+		g.TimeLeft = consts.OneMinute
 		GameChangeToNightHint <- g
 	} else {
 		g.settle()
 		g.IsDay = GameIsDay
+		g.TimeLeft = consts.TwoMinutes
 		g.Round++
 		g.winloseCheck()
 		GameChangeToDayHint <- g
@@ -238,7 +261,6 @@ func (g *Game) winloseCheck() {
 
 // core logic!
 func (g *Game) settle() {
-	g.checkList = g.Players
 	// Stage I: tag the target and beast the player abort
 	g.settleStageTag()
 	// Stage II: check betray.
@@ -278,17 +300,11 @@ func (g *Game) settleStageTag() {
 			}
 		}
 	}
-	for i, player := range g.checkList {
-		if !player.Live {
-			g.checkList = append(g.checkList[:i], g.checkList[i+1:]...)
-		}
-	}
 }
 
 func (g *Game) settleStageCheckBetry() {
-	for _, player := range g.checkList {
-		if player.Live == PlayerDead || player.Unioned == nil ||
-			player.UnionValidation() { // Here must some mistakes.
+	for _, player := range g.Players {
+		if player.UnionValidation() { // Here must some mistakes.
 			player.Ununion()
 			continue
 		}
@@ -312,18 +328,10 @@ func (g *Game) settleStageCheckBetry() {
 			}
 		}
 	}
-	for i, player := range g.checkList {
-		if !player.Live {
-			g.checkList = append(g.checkList[:i], g.checkList[i+1:]...)
-		}
-	}
 }
 
 func (g *Game) settleStageCheckDeath() {
-	for _, player := range g.checkList {
-		if player.Live == PlayerDead {
-			continue
-		}
+	for _, player := range g.Players {
 		if player.Target != nil && player.Target.Live { // I want to kill some one.
 			if player.Status >= PlayerStatusBeast { // I am a beast
 				if player.Target.Target == player { // Kill each other

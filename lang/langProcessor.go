@@ -8,37 +8,37 @@ import (
 
 	"git.wetofu.top/tonychee7000/blackForestBot/basis"
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
+	"git.wetofu.top/tonychee7000/blackForestBot/database"
+	"git.wetofu.top/tonychee7000/blackForestBot/models"
 )
 
 func init() {
-	/*
-		var users []models.User
-		var groups []models.TgGroup
-		if err := database.DB.Find(&users).Error; err != nil {
+	var users []models.User
+	var groups []models.TgGroup
+	if err := database.DB.Find(&users).Error; err != nil {
+		panic(err)
+	}
+	if err := database.DB.Find(&groups).Error; err != nil {
+		panic(err)
+	}
+	for i, user := range users {
+		if err := database.Redis.Set(
+			fmt.Sprintf(consts.LangSetFormatString, user.TgUserID),
+			user.Language, -1,
+		).Err(); err != nil {
 			panic(err)
 		}
-		if err := database.DB.Find(&groups).Error; err != nil {
+		log.Printf("Load user language set: %d/%d", i+1, len(users))
+	}
+	for i, group := range groups {
+		if err := database.Redis.Set(
+			fmt.Sprintf(consts.LangSetFormatString, group.TgGroupID),
+			group.Lang, -1,
+		).Err(); err != nil {
 			panic(err)
 		}
-		for i, user := range users {
-			if err := database.Redis.Set(
-				fmt.Sprintf(consts.LangSetFormatString, user.TgUserID),
-				user.Language, -1,
-			).Err(); err != nil {
-				panic(err)
-			}
-			log.Printf("Load user language set: %d/%d", i+1, len(users))
-		}
-		for i, group := range groups {
-			if err := database.Redis.Set(
-				fmt.Sprintf(consts.LangSetFormatString, group.TgGroupID),
-				group.Lang, -1,
-			).Err(); err != nil {
-				panic(err)
-			}
-			log.Printf("Load group language set: %d/%d", i+1, len(groups))
-		}
-	*/
+		log.Printf("Load group language set: %d/%d", i+1, len(groups))
+	}
 }
 
 // T set lang and return real info

@@ -5,6 +5,7 @@ var (
 	NewGameHint           chan *Game
 	UserJoinHint          chan *User
 	GameFleeHint          chan *User
+	GameNoFleeHint        chan *User
 	NotEnoughPlayersHint  chan *Game
 	JoinTimeLeftHint      chan *Game
 	StartGameFailed       chan *Game
@@ -15,15 +16,18 @@ var (
 	GameChangeToDayHint   chan *Game
 	GameLoseHint          chan *Game
 	WinGameHint           chan *Game
-	PlayersHint           chan *Game
+	PlayersHint           chan *Game // Change player list
 	PlayerKillHint        chan *Player
 	PlayerBeastHint       chan *Player
+	GetPlayersHint        chan *Game
+	UserStatsHint         chan *User
 )
 
 func init() {
 	NewGameHint = make(chan *Game, 1024)
 	UserJoinHint = make(chan *User, 1024)
 	GameFleeHint = make(chan *User, 1024)
+	GameNoFleeHint = make(chan *User, 1024)
 	NotEnoughPlayersHint = make(chan *Game, 1024)
 	JoinTimeLeftHint = make(chan *Game, 1024)
 	StartGameFailed = make(chan *Game, 1024)
@@ -37,4 +41,6 @@ func init() {
 	PlayersHint = make(chan *Game, 1024)
 	PlayerKillHint = make(chan *Player, 1024)
 	PlayerBeastHint = make(chan *Player, 1024)
+	GetPlayersHint = make(chan *Game, 1024)
+	UserStatsHint = make(chan *User, 1024)
 }

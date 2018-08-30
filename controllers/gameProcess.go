@@ -1,16 +1,6 @@
 package controllers
 
-import (
-	"fmt"
-	"log"
-
-	"git.wetofu.top/tonychee7000/blackForestBot/bot"
-	"git.wetofu.top/tonychee7000/blackForestBot/config"
-	"git.wetofu.top/tonychee7000/blackForestBot/lang"
-	"git.wetofu.top/tonychee7000/blackForestBot/models"
-	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
-)
-
+/*
 func winHint(game *models.Game, winner *models.Player, bot *bot.Bot) error {
 	winner.User.GamesWon++
 	winner.User.Update()
@@ -89,3 +79,4 @@ func sendUnionRequest(from, to *models.Player, bot *bot.Bot) error {
 	to.UnionReqs = append(to.UnionReqs, nmsg.MessageID)
 	return nil
 }
+*/

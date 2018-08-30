@@ -18,6 +18,18 @@ type Bot struct {
 	procFunc       ProceedFunc
 }
 
+//DefaultBot and only one bot here
+var DefaultBot *Bot
+
+func init() {
+	DefaultBot = NewBot()
+	if err := DefaultBot.Connect(config.DefaultConfig); err != nil {
+		log.Fatalln("FATAL:", err)
+	}
+	log.Printf("Bot authoirzed by name: %s(%d)", DefaultBot.Name(), DefaultBot.ID())
+	DefaultBot.RegisterProcessor(messageProcessor)
+}
+
 // NewBot for create
 func NewBot() *Bot {
 	var b = new(Bot)
@@ -46,7 +58,7 @@ func (b *Bot) Connect(conf config.Config) error {
 
 // Run to proceed
 func (b *Bot) Run() {
-	go messageManager()
+	go b.messageManager()
 	for {
 		select {
 		case update := <-b.updatesChannel:
