@@ -20,12 +20,15 @@ import (
 type eventFunc func(*tgApi.Message, ...string) error
 
 var isAdminMode bool
+
+//CommandList is
 var CommandList map[string]eventFunc
 
 func init() {
 	CommandList = make(map[string]eventFunc)
 	CommandList["start"] = onStart
 	CommandList["help"] = onHelp
+	CommandList["about"] = onAbout
 	CommandList["startgame"] = onStartGame
 	CommandList["admin"] = onAdmin
 	CommandList["extend"] = onExtend
@@ -58,9 +61,15 @@ func OnJoinAChat(msg *tgApi.Message) error {
 	).FirstOrCreate(group).Error; err != nil {
 		return err
 	}
+	if err := database.Redis.Set(
+		fmt.Sprintf(consts.LangSetFormatString, msg.Chat.ID),
+		group.Lang, -1,
+	).Err(); err != nil {
+		return err
+	}
 
 	log.Printf("Group `%s` registered.\n", group.Name)
-	//OnJoinAChatEvent <- msg
+	OnJoinAChatEvent <- msg
 	return nil
 }
 
@@ -112,13 +121,13 @@ func OnReceiveAnimation(msg *tgApi.Message) error {
 	if err := config.DefaultImages.WriteConfig(path.Join(appPath, "images.dat")); err != nil {
 		return err
 	}
-	//OnReceiveAnimationEvent <- msg
+	OnReceiveAnimationEvent <- msg
 	return nil
 }
 
 func onStart(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID < 0 {
-		//PMOnlyEvent <- msg
+		PMOnlyEvent <- msg
 		return errors.New("pm only")
 	}
 	user := new(models.User)
@@ -130,6 +139,12 @@ func onStart(msg *tgApi.Message, args ...string) error {
 	).FirstOrCreate(user).Error; err != nil {
 		return err
 	}
+	if err := database.Redis.Set(
+		fmt.Sprintf(consts.LangSetFormatString, msg.From.ID),
+		user.Language, -1,
+	).Err(); err != nil {
+		return err
+	}
 	log.Printf("User `%s(%d)` registered.\n", user.Name, user.TgUserID)
 
 	if args != nil && len(args) != 0 {
@@ -137,12 +152,12 @@ func onStart(msg *tgApi.Message, args ...string) error {
 		if err != nil {
 			return err
 		}
-		game := gameList[id]
-		if game != nil && game.Status == models.GameNotStart {
+		game, ok := gameList[id]
+		if ok && game != nil && game.Status == models.GameNotStart {
 			game.Join(user)
 		}
 	} else {
-		//OnStartEvent <- msg
+		OnStartEvent <- msg
 	}
 
 	return nil
@@ -159,46 +174,51 @@ func onStartGame(msg *tgApi.Message, args ...string) error {
 			return err
 		}
 
-		game := gameList[msg.Chat.ID]
-		if game != nil && game.TgGroup.TgGroupID == msg.Chat.ID &&
+		game, ok := gameList[msg.Chat.ID]
+		if ok && game != nil && game.TgGroup.TgGroupID == msg.Chat.ID &&
 			game.Status != models.GameOver {
-			//GroupHasAGameEvent <- msg
+			GroupHasAGameEvent <- msg
 		}
 
 		game = models.NewGame(group, user)
 		gameList[msg.Chat.ID] = game
 	} else {
-		//GroupOnlyEvent <- msg
+		GroupOnlyEvent <- msg
 	}
 	return nil
 }
 
 func onHelp(msg *tgApi.Message, args ...string) error {
-	//HelpEvent <- msg
+	HelpEvent <- msg
+	return nil
+}
+
+func onAbout(msg *tgApi.Message, args ...string) error {
+	AboutEvent <- msg
 	return nil
 }
 
 func onAdmin(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID < 0 {
-		//PMOnlyEvent <- msg
+		PMOnlyEvent <- msg
 	}
 	if args == nil || len(args) == 0 || args[0] == "" {
 		isAdminMode = false
-		//AdminModeOffEvent <- msg
+		AdminModeOffEvent <- msg
 		return nil
 	}
 	if args != nil && len(args) == 1 && args[0] == config.DefaultConfig.AdminPassword {
 		isAdminMode = true
-		//AdminModeOnEvent <- msg
+		AdminModeOnEvent <- msg
 		return nil
 	}
-	//AdminBadPasswordEvent <- msg
+	AdminBadPasswordEvent <- msg
 	return nil
 }
 
 func onExtend(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID > 0 {
-		//GroupOnlyEvent <- msg
+		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
 	var (
@@ -214,8 +234,8 @@ func onExtend(msg *tgApi.Message, args ...string) error {
 		}
 	}
 
-	game := gameList[msg.Chat.ID]
-	if game != nil {
+	game, ok := gameList[msg.Chat.ID]
+	if ok && game != nil {
 		game.Extend(eta)
 	}
 	return nil
@@ -223,12 +243,12 @@ func onExtend(msg *tgApi.Message, args ...string) error {
 
 func onPlayers(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID > 0 {
-		//GroupOnlyEvent <- msg
+		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
 
-	game := gameList[msg.Chat.ID]
-	if game != nil {
+	game, ok := gameList[msg.Chat.ID]
+	if ok && game != nil {
 		game.HintPlayers()
 	}
 	return nil
@@ -236,44 +256,22 @@ func onPlayers(msg *tgApi.Message, args ...string) error {
 
 func onFlee(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID > 0 {
-		//GroupOnlyEvent <- msg
+		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
 	user, err := models.GetUser(int64(msg.From.ID))
 	if err != nil {
 		return err
 	}
-	game := gameList[msg.Chat.ID]
-	if game != nil {
+	game, ok := gameList[msg.Chat.ID]
+	if ok && game != nil {
 		game.Flee(user)
 	}
 	return nil
 }
 
 func onSetLang(msg *tgApi.Message, args ...string) error {
-	//SetLangMsgEvent <- msg
-
-	/*btns := make([]tgApi.InlineKeyboardButton, 0)
-	for l := range basis.GlobalLanguageList {
-		btns = append(btns, tgApi.NewInlineKeyboardButtonData(l, "setlang="+l))
-	}
-	var mk tgApi.InlineKeyboardMarkup
-	for i := 0; i < len(btns); i += 2 {
-		if len(btns)-i <= len(btns)%2 {
-			mk.InlineKeyboard = append(mk.InlineKeyboard, btns[i:])
-		} else {
-			mk.InlineKeyboard = append(mk.InlineKeyboard, btns[i:i+2])
-		}
-	}
-	if msg.Chat.ID > 0 {
-		if _, err := markdownReply(int64(msg.From.ID), "setlang", msg, bot, nil, mk); err != nil {
-			return err
-		}
-	} else if msg.Chat.ID < 0 {
-		if _, err := markdownReply(msg.Chat.ID, "setlang", msg, bot, nil, mk); err != nil {
-			return err
-		}
-	}*/
+	SetLangMsgEvent <- msg
 	return nil
 }
 
@@ -299,7 +297,7 @@ func onStat(msg *tgApi.Message, args ...string) error {
 
 func onNextGame(msg *tgApi.Message, arg ...string) error {
 	if msg.Chat.ID > 0 {
-		//GroupOnlyEvent <- msg
+		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
 	user, err := models.GetUser(int64(msg.From.ID))
@@ -320,46 +318,17 @@ func onNextGame(msg *tgApi.Message, arg ...string) error {
 		return err
 	}
 
-	//NextGameEvent <- msg
-
-	/*
-		langSet := getLang(int64(msg.From.ID))
-		reply := tgApi.NewMessage(
-			int64(msg.From.ID),
-			lang.T(langSet, "gamequeue", msg.Chat.Title),
-		)
-		btn := tgApi.NewInlineKeyboardButtonData(
-			lang.T(langSet, "cancel", nil),
-			fmt.Sprintf("cancelgame=%d", msg.Chat.ID),
-		)
-		reply.ReplyMarkup = tgApi.NewInlineKeyboardMarkup(tgApi.NewInlineKeyboardRow(btn))
-		nmsg, err := bot.Send(reply)
-		if err != nil {
-			return err
-		}
-		var gameQueueMsg []int
-		if err := database.Redis.Get(
-			fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
-		).Scan(&gameQueueMsg); err != nil {
-			return err
-		}
-		gameQueueMsg = append(gameQueueMsg, nmsg.MessageID)
-		if err := database.Redis.Set(
-			fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
-			gameQueueMsg, -1,
-		).Err(); err != nil {
-			return err
-		}*/
+	NextGameEvent <- msg
 	return nil
 }
 
 func onForceStart(msg *tgApi.Message, arg ...string) error {
 	if msg.Chat.ID < 0 {
-		game := gameList[msg.Chat.ID]
-		if game != nil {
+		game, ok := gameList[msg.Chat.ID]
+		if ok && game != nil {
 			return game.ForceStart()
 		}
 	}
-	//GroupOnlyEvent <- msg
+	GroupOnlyEvent <- msg
 	return errors.New("Group only")
 }

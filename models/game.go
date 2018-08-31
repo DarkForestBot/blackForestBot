@@ -100,8 +100,15 @@ func (g *Game) Join(user *User) {
 	defer lock.Unlock()
 
 	if g.Status == GameNotStart {
+		//Don't join game repeat.
+		for _, gu := range g.Users {
+			if gu == user {
+				return
+			}
+		}
 		g.Users = append(g.Users, user)
 	}
+	user.TgGroupJoinGame = g.TgGroup
 	UserJoinHint <- user
 }
 
@@ -130,6 +137,7 @@ func (g *Game) Start() error {
 	g.TimeLeft = consts.TwoMinutes
 	g.IsDay = GameIsDay
 	g.Round = 1 // First day
+	GameChangeToDayHint <- g
 	return nil
 }
 

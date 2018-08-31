@@ -41,14 +41,7 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		).Err(); err != nil {
 			return err
 		}
-		//DeleteMessageEvent <- tgApi.DeleteMessageConfig{}
-		/*
-			if _, err := bot.DeleteMessage(tgApi.DeleteMessageConfig{
-				ChatID:    act.Message.Chat.ID,
-				MessageID: act.Message.MessageID,
-			}); err != nil {
-				return err
-			}*/
+
 	} else if act.Message.Chat.ID > 0 {
 		user, err := models.GetUser(int64(act.Message.From.ID))
 		if err != nil {
@@ -64,17 +57,12 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		).Err(); err != nil {
 			return err
 		}
-		//DeleteMessageEvent <- tgApi.DeleteMessageConfig{}
-		/*
-			if _, err := bot.DeleteMessage(tgApi.DeleteMessageConfig{
-				ChatID:    act.Message.Chat.ID,
-				MessageID: act.Message.MessageID,
-			}); err != nil {
-				return err
-			}
-		*/
 	}
-	//LanguageChangedEvent <- act
+	DeleteMessageEvent <- tgApi.DeleteMessageConfig{
+		ChatID:    act.Message.Chat.ID,
+		MessageID: act.Message.MessageID,
+	}
+	LanguageChangedEvent <- act
 	/*
 		if _, err := markdownMessage(act.Message.Chat.ID, "langchanged", bot, nil); err != nil {
 			return err
@@ -104,14 +92,9 @@ func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
 	).Err(); err != nil {
 		return err
 	}
-	//DeleteMessageEvent <- tgApi.DeleteMessageConfig{}
-	/*
-		if _, err := bot.DeleteMessage(tgApi.DeleteMessageConfig{
-			ChatID:    act.Message.Chat.ID,
-			MessageID: act.Message.MessageID,
-		}); err != nil {
-			return err
-		}
-	*/
+	DeleteMessageEvent <- tgApi.DeleteMessageConfig{
+		ChatID:    act.Message.Chat.ID,
+		MessageID: act.Message.MessageID,
+	}
 	return nil
 }

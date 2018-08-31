@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"git.wetofu.top/tonychee7000/blackForestBot/controllers"
+
+	"git.wetofu.top/tonychee7000/blackForestBot/models"
+
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
@@ -28,15 +32,17 @@ func joinButton(ID int64, bot *Bot) tgApi.InlineKeyboardMarkup {
 	return tgApi.NewInlineKeyboardMarkup(tgApi.NewInlineKeyboardRow(joinButton))
 }
 
-func startGamePM(msg *tgApi.Message) error {
-	var gameQueue []int64
-	if err := database.Redis.Get(
-		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
-	).Scan(&gameQueue); err != nil {
-		return err
+func (b *Bot) startGameClearMessage(game *models.Game) {
+	//Step I: delete join time left message
+	for _, id := range game.MsgSent.JoinTimeMsg {
+		controllers.DeleteMessageEvent <- tgApi.DeleteMessageConfig{
+			ChatID:    game.TgGroup.TgGroupID,
+			MessageID: id,
+		}
 	}
-	for _, i := range gameQueue {
-		markdownMessage(i, "newgame", msg.Chat.Title)
-	}
-	return nil
+	//Step II: remove join button
+	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		game.TgGroup.TgGroupID, game.MsgSent.StartMsg,
+		tgApi.InlineKeyboardMarkup{},
+	)
 }
