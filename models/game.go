@@ -206,6 +206,9 @@ func (g *Game) RunCheck() {
 		fallthrough
 	default:
 		g.Cron.Stop()
+		for _, user := range g.Users {
+			user.CheckAchivement()
+		}
 	}
 }
 
