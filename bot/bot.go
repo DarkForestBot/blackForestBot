@@ -8,7 +8,7 @@ import (
 )
 
 // ProceedFunc recv and reply
-type ProceedFunc func(tgApi.Update, *Bot) error
+type ProceedFunc func(tgApi.Update, *Bot)
 
 // Bot a bot
 type Bot struct {
@@ -62,10 +62,7 @@ func (b *Bot) Run() {
 	for {
 		select {
 		case update := <-b.updatesChannel:
-			err := b.procFunc(update, b)
-			if err != nil {
-				log.Println("ERROR:", err)
-			}
+			go b.procFunc(update, b)
 		}
 	}
 }

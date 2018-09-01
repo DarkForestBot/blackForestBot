@@ -8,6 +8,7 @@ var (
 	GameNoFleeHint         chan *User
 	NotEnoughPlayersHint   chan *Game
 	JoinTimeLeftHint       chan *Game
+	TryStartGameHint       chan *Game
 	StartGameFailed        chan *Game
 	StartGameSuccess       chan *Game
 	GameTimeOutOperation   chan *Game
@@ -36,6 +37,7 @@ func init() {
 	GameNoFleeHint = make(chan *User, 1024)
 	NotEnoughPlayersHint = make(chan *Game, 1024)
 	JoinTimeLeftHint = make(chan *Game, 1024)
+	TryStartGameHint = make(chan *Game, 1024)
 	StartGameFailed = make(chan *Game, 1024)
 	StartGameSuccess = make(chan *Game, 1024)
 	GameTimeOutOperation = make(chan *Game, 1024)

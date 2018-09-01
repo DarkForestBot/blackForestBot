@@ -2,33 +2,42 @@ package bot
 
 import (
 	"errors"
+	"log"
 	"strings"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/controllers"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func messageProcessor(update tgApi.Update, bot *Bot) error {
+func messageProcessor(update tgApi.Update, bot *Bot) {
+	threadLimitPool <- 1
+	defer releaseThreadPool()
 	msg := update.Message
 	if msg != nil {
 		if err := checkJoinEvent(msg, bot); err != nil {
-			return err
+			log.Println("ERROR:", err)
+			return
 		}
 		if err := checkLeaveEvent(msg, bot); err != nil {
-			return err
+			log.Println("ERROR:", err)
+			return
 		}
 		if err := checkAnimationEvent(msg); err != nil {
-			return err
+			log.Println("ERROR:", err)
+			return
 		}
 		if err := checkCommandEvent(msg); err != nil {
-			return err
+			log.Println("ERROR:", err)
+			return
 		}
 	}
 	act := update.CallbackQuery
 	if act != nil {
-		return checkCallbackEvent(act, bot)
+		if err := checkCallbackEvent(act, bot); err != nil {
+			log.Println("ERROR:", err)
+			return
+		}
 	}
-	return nil
 }
 
 func checkJoinEvent(msg *tgApi.Message, bot *Bot) error {

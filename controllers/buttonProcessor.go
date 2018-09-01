@@ -116,13 +116,16 @@ func btnShootOne(arg string, act *tgApi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-
-	player := gameList[ID].GetPlayer(int64(act.From.ID))
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
+	player := game.GetPlayer(int64(act.From.ID))
 	if player == nil {
 		return errors.New("No such player found")
 	}
 
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -143,13 +146,16 @@ func btnShootTwo(arg string, act *tgApi.CallbackQuery) error {
 		return err
 	}
 
-	game := gameList[ID]
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
 	player := game.GetPlayer(int64(act.From.ID))
 	if player == nil {
 		return errors.New("No such player found")
 	}
 
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -176,12 +182,17 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 		return err
 	}
 
-	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
+
+	srcPlayer := game.GetPlayer(int64(act.From.ID))
 	if srcPlayer == nil {
 		return errors.New("No such source player")
 	}
 
-	targetPlayer := gameList[ID].GetPlayer(userID)
+	targetPlayer := game.GetPlayer(userID)
 	if targetPlayer == nil {
 		return errors.New("No such target player")
 	}
@@ -203,16 +214,21 @@ func btnUnionAccept(arg string, act *tgApi.CallbackQuery) error {
 		return err
 	}
 
-	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
+
+	srcPlayer := game.GetPlayer(int64(act.From.ID))
 	if srcPlayer == nil {
 		return errors.New("No such source player")
 	}
 
-	targetPlayer := gameList[ID].GetPlayer(userID)
+	targetPlayer := game.GetPlayer(userID)
 	if targetPlayer == nil {
 		return errors.New("No such target player")
 	}
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -233,12 +249,17 @@ func btnUnionReject(arg string, act *tgApi.CallbackQuery) error {
 		return err
 	}
 
-	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
+
+	srcPlayer := game.GetPlayer(int64(act.From.ID))
 	if srcPlayer == nil {
 		return errors.New("No such source player")
 	}
 
-	targetPlayer := gameList[ID].GetPlayer(userID)
+	targetPlayer := game.GetPlayer(userID)
 	if targetPlayer == nil {
 		return errors.New("No such target player")
 	}
@@ -252,11 +273,11 @@ func btnBetray(arg string, act *tgApi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-	game := gameList[ID]
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
 	player := game.GetPlayer(int64(act.From.ID))
-	var lock sync.Mutex
-	lock.Lock()
-	defer lock.Unlock()
 	game.AttachOperation(player.Shoot(true, nil))
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
@@ -269,11 +290,11 @@ func btnTrap(arg string, act *tgApi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-	game := gameList[ID]
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
 	player := game.GetPlayer(int64(act.From.ID))
-	var lock sync.Mutex
-	lock.Lock()
-	defer lock.Unlock()
 	player.TrapSet = true
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
@@ -286,10 +307,11 @@ func btnAbort(arg string, act *tgApi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-	game := gameList[ID]
+	game, ok := gameList[ID]
+	if !ok {
+		return errors.New("No such game")
+	}
 	player := game.GetPlayer(int64(act.From.ID))
-	var lock sync.Mutex
-	lock.Lock()
 	game.AttachOperation(player.Abort())
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})

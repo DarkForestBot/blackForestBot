@@ -26,6 +26,8 @@ func (b *Bot) messageManager() {
 			go b.onNotEnoughPlayersHint(game)
 		case game := <-models.JoinTimeLeftHint:
 			go b.onJoinTimeLeftHint(game)
+		case game := <-models.TryStartGameHint:
+			go b.onTryStartGameHint(game)
 		case game := <-models.StartGameFailed:
 			go b.onStartGameFailed(game)
 		case game := <-models.StartGameSuccess: // clear next game pm list

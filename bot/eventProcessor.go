@@ -33,9 +33,10 @@ func (b *Bot) onAchivementRewardedHint(user *models.User) {
 func (b *Bot) onNewGameHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
+
 	langSet := game.TgGroup.Lang
 	var (
 		msg tgApi.Message
@@ -133,10 +134,9 @@ func (b *Bot) onNotEnoughPlayersHint(game *models.Game) {
 func (b *Bot) onJoinTimeLeftHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
-
 	langSet := game.TgGroup.Lang
 	msg, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "jointime",
@@ -147,6 +147,20 @@ func (b *Bot) onJoinTimeLeftHint(game *models.Game) {
 		log.Println("ERROR:", err)
 	}
 	game.MsgSent.JoinTimeMsg = append(game.MsgSent.JoinTimeMsg, msg.MessageID)
+}
+
+func (b *Bot) onTryStartGameHint(game *models.Game) {
+	threadLimitPool <- 1
+	defer releaseThreadPool()
+	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		game.TgGroup.TgGroupID, game.MsgSent.StartMsg, tgApi.InlineKeyboardMarkup{},
+	)
+	for _, id := range game.MsgSent.JoinTimeMsg {
+		controllers.DeleteMessageEvent <- tgApi.DeleteMessageConfig{
+			ChatID:    game.TgGroup.TgGroupID,
+			MessageID: id,
+		}
+	}
 }
 
 func (b *Bot) onStartGameFailed(game *models.Game) {
@@ -174,6 +188,9 @@ func (b *Bot) onStartGameSuccess(game *models.Game) {
 func (b *Bot) onGameTimeOutOperation(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	for _, player := range game.Players {
 		if !player.Live {
 			continue
@@ -230,7 +247,7 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 		log.Println("ERROR:", err)
 	}
 	// send everyone operations...
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 	for _, player := range game.Players {
@@ -259,7 +276,7 @@ func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 		log.Println("ERROR:", err)
 	}
 	// send everyone operations...
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -302,6 +319,9 @@ func (b *Bot) onShootXHint(player *models.Player) {
 func (b *Bot) onShootYHint(player *models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		player.User.TgUserID, player.OperationMsg,
 		tgApi.InlineKeyboardMarkup{},
@@ -352,7 +372,7 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 		return
 	}
 
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 	players[1].UnionReqRecv = append(players[1].UnionReqRecv, models.NewUnionReqRecv(nmsg, players[0]))
@@ -380,7 +400,7 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 			}
 		}
 	}
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 	players[1].UnionReqRecv = []*models.UnionReqRecv{}

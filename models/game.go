@@ -80,7 +80,7 @@ func NewGame(tg *TgGroup, founder *User) *Game {
 
 //Extend is to extend join time
 func (g *Game) Extend(timeSecond int) {
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -95,7 +95,7 @@ func (g *Game) Extend(timeSecond int) {
 
 //Join is add user to game
 func (g *Game) Join(user *User) {
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -114,7 +114,7 @@ func (g *Game) Join(user *User) {
 
 //Flee is remove user to game or kill player in game
 func (g *Game) Flee(user *User) {
-	var lock sync.Mutex
+	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -129,6 +129,9 @@ func (g *Game) Flee(user *User) {
 
 //Start is go!
 func (g *Game) Start() error {
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	if len(g.Users) < GameMinPlayers {
 		return errors.New("Too less users")
 	}
@@ -143,10 +146,6 @@ func (g *Game) Start() error {
 
 //ForceStart is
 func (g *Game) ForceStart() error {
-	var lock sync.Mutex
-	lock.Lock()
-	defer lock.Unlock()
-
 	if err := g.Start(); err != nil {
 		NotEnoughPlayersHint <- g
 		return err
@@ -183,6 +182,9 @@ func (g *Game) GetPosition(x, y int) *Position {
 
 // AttachOperation is
 func (g *Game) AttachOperation(op *Operation) {
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	g.Operations = append(g.Operations, op)
 }
 
@@ -193,10 +195,6 @@ func (g *Game) HintPlayers() {
 
 // RunCheck is
 func (g *Game) RunCheck() {
-	var lock sync.Mutex
-	lock.Lock()
-	defer lock.Unlock()
-
 	g.countDown()
 	switch g.Status {
 	case GameNotStart:
@@ -222,10 +220,14 @@ func (g *Game) joinTimeCheck() {
 	case 10:
 		JoinTimeLeftHint <- g
 	case 0:
+		TryStartGameHint <- g
 		if g.Status != GameNotStart {
 			return
 		}
 		if err := g.Start(); err != nil {
+			var lock sync.RWMutex
+			lock.Lock()
+			defer lock.Unlock()
 			g.Status = GameOver
 			StartGameFailed <- g
 		} else {
@@ -247,6 +249,9 @@ func (g *Game) gameTimeCheck() {
 		AbortPlayerHint <- p
 	}
 	//Step III: check and change phase
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	if g.IsDay {
 		g.IsDay = GameIsNight
 		g.TimeLeft = consts.OneMinute
@@ -501,6 +506,9 @@ func (g *Game) makePlayer() {
 }
 
 func (g *Game) countDown() {
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	if g.TimeLeft > 0 {
 		g.TimeLeft--
 	}
