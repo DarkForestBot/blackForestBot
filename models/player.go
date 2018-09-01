@@ -44,14 +44,15 @@ var reasonStrings = []string{
 	"beasts killed each other",
 }
 
+//UnionReqRecv is
 type UnionReqRecv struct {
 	Msg  tgApi.Message
 	From *Player
 }
 
 //NewUnionReqRecv is
-func NewUnionReqRecv(msg tgApi.Message, from *Player) *unionReqRecv {
-	n := new(unionReqRecv)
+func NewUnionReqRecv(msg tgApi.Message, from *Player) *UnionReqRecv {
+	n := new(UnionReqRecv)
 	n.Msg = msg
 	n.From = from
 	return n
@@ -59,22 +60,23 @@ func NewUnionReqRecv(msg tgApi.Message, from *Player) *unionReqRecv {
 
 //Player is used in redis
 type Player struct {
-	User         *User
-	Live         bool
-	KilledReason PlayerKilledReason
-	Position     *Position // two-way bond
-	Unioned      *Player
-	Grouped      *Group
-	Role         *Role //TODO: soon tm
-	Status       int
-	TrapSet      bool
-	ShootX       int // Every round clear
-	ShootY       int // Every round clear
-	UnionReqRecv []*UnionReqRecv
-	UnionReq     int
-	OperationMsg int
-	Target       *Player // Will kill whom
-	HintBeast    bool
+	User                    *User
+	Live                    bool
+	KilledReason            PlayerKilledReason
+	Position                *Position // two-way bond
+	Unioned                 *Player
+	Grouped                 *Group
+	Role                    *Role //TODO: soon tm
+	Status                  int
+	TrapSet                 bool
+	ShootX                  int // Every round clear
+	ShootY                  int // Every round clear
+	UnionReqRecv            []*UnionReqRecv
+	UnionReq                int
+	OperationMsg            int
+	Target                  *Player // Will kill whom
+	HintBeast               bool
+	CurrentGamePlayersCount int
 }
 
 //NewPlayer is called when start a game

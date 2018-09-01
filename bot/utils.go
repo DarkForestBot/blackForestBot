@@ -100,7 +100,7 @@ func makeNightOperations(TgGroupID int64, player *models.Player, step int) tgApi
 		)
 	}
 	var br = make([]tgApi.InlineKeyboardButton, 0)
-	for i := 0; i < len(game.Players)*2; i++ {
+	for i := 0; i < player.CurrentGamePlayersCount*2; i++ {
 		var data string
 		if step == 0 {
 			if i == player.Position.X {

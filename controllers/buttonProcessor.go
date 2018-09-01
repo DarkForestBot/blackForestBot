@@ -260,6 +260,7 @@ func btnBetray(arg string, act *tgApi.CallbackQuery) error {
 	game.AttachOperation(player.Shoot(true, nil))
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+	return nil
 }
 
 func btnTrap(arg string, act *tgApi.CallbackQuery) error {
@@ -273,9 +274,10 @@ func btnTrap(arg string, act *tgApi.CallbackQuery) error {
 	var lock sync.Mutex
 	lock.Lock()
 	defer lock.Unlock()
-	player.TrapSet == true
+	player.TrapSet = true
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+	return nil
 }
 
 func btnAbort(arg string, act *tgApi.CallbackQuery) error {
@@ -291,4 +293,5 @@ func btnAbort(arg string, act *tgApi.CallbackQuery) error {
 	game.AttachOperation(player.Abort())
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+	return nil
 }

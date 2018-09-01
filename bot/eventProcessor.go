@@ -15,6 +15,21 @@ import (
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+func (b *Bot) onAchivementRewardedHint(user *models.User) {
+	threadLimitPool <- 1
+	defer releaseThreadPool()
+	langSet := user.Language
+	_, err := b.MarkdownMessage(
+		user.TgUserID, langSet, "achivementrewarded",
+		lang.T(
+			langSet, fmt.Sprintf(
+				"achivement%03d", user.AchivementCode), nil),
+	)
+	if err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
 func (b *Bot) onNewGameHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
@@ -318,7 +333,7 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 	)
 	// Step I: remove union request button.
 	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
-		player[0].User.TgUserID, player[0].UnionReq,
+		players[0].User.TgUserID, players[0].UnionReq,
 		tgApi.InlineKeyboardMarkup{},
 	)
 
@@ -353,7 +368,7 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 		log.Println("ERROR:", err)
 	}
 
-	for i, msg := range players[1].UnionReqRecv {
+	for _, msg := range players[1].UnionReqRecv {
 		controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 		)

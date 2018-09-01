@@ -340,6 +340,7 @@ func (g *Game) settleStageCheckBetry() {
 			} else { // I betrayed my union
 				if player.Target.TrapSet {
 					player.Kill(Trapped) // Oops! I was trapped!
+					player.User.KilledByTrapCount++
 				} else {
 					player.Target.Kill(Betrayed)
 					player.Target = nil
@@ -362,8 +363,7 @@ func (g *Game) settleStageCheckDeath() {
 						player.Target.Kill(EatenByBeast)
 					}
 				} else { // My target not kill me.
-					player.Target.Kill(EatenByBeast)
-					player.User.KillCount++
+					g.killPlayerNormal(player, EatenByBeast)
 				}
 			} else { // I am not a beast
 				if player.Target.Target == player { // Kill each other
@@ -374,7 +374,7 @@ func (g *Game) settleStageCheckDeath() {
 						player.Target.Kill(Shot) // All dead.
 					}
 				} else { // My target not kill me.
-					player.Target.Kill(Shot)
+					g.killPlayerNormal(player, Shot)
 				}
 			}
 			player.User.ShootCount++
@@ -409,6 +409,16 @@ func (g *Game) settleStageExposePosition() {
 			player.StatusChange()
 		}
 	}
+}
+
+func (g *Game) killPlayerNormal(player *Player, killedReason PlayerKilledReason) {
+	player.Target.Kill(killedReason)
+	if player.Target.Status == PlayerStatusNormal {
+		player.User.GuessKillCount++
+	} else if player.Target.Status == PlayerStatusXExposed {
+		player.User.SniperKillCount++
+	}
+	player.User.KillCount++
 }
 
 func (g *Game) findAbort() []*Player {
@@ -478,6 +488,7 @@ func (g *Game) makePlayer() {
 		for _, pos := range g.Positions {
 			if pos.CheckPosition(xi, yi) {
 				player := NewPlayer(user, pos)
+				player.CurrentGamePlayersCount = len(g.Users)
 				pos.BindPlayer(player) // Two-way binding
 				g.Players = append(g.Players, player)
 			}
