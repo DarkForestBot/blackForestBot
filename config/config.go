@@ -20,6 +20,7 @@ type Config struct {
 	Database      string `json:"database"`
 	Redis         string `json:"redis"`
 	AdminPassword string `json:"adminPassword"`
+	ThreadLimit   int    `json:"threadLimit"`
 }
 
 //DefaultConfig is global

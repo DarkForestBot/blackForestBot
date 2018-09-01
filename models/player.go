@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"log"
+
+	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //List of some consts
@@ -42,6 +44,19 @@ var reasonStrings = []string{
 	"beasts killed each other",
 }
 
+type UnionReqRecv struct {
+	Msg  tgApi.Message
+	From *Player
+}
+
+//NewUnionReqRecv is
+func NewUnionReqRecv(msg tgApi.Message, from *Player) *unionReqRecv {
+	n := new(unionReqRecv)
+	n.Msg = msg
+	n.From = from
+	return n
+}
+
 //Player is used in redis
 type Player struct {
 	User         *User
@@ -55,7 +70,9 @@ type Player struct {
 	TrapSet      bool
 	ShootX       int // Every round clear
 	ShootY       int // Every round clear
-	UnionReqs    []int
+	UnionReqRecv []*UnionReqRecv
+	UnionReq     int
+	OperationMsg int
 	Target       *Player // Will kill whom
 	HintBeast    bool
 }
@@ -69,7 +86,7 @@ func NewPlayer(user *User, position *Position) *Player {
 	player.Position = position
 	player.Status = PlayerStatusNormal
 	player.TrapSet = PlayerUnsetTrap
-	player.UnionReqs = make([]int, 0)
+	player.UnionReqRecv = make([]*UnionReqRecv, 0)
 	user.GamesJoined++
 	user.Update()
 	return player
@@ -79,6 +96,10 @@ func NewPlayer(user *User, position *Position) *Player {
 func (p *Player) Union(fromPlayer *Player) {
 	p.Unioned = fromPlayer
 	fromPlayer.Unioned = p
+	fromPlayer.User.UnionSuccessCount++
+	fromPlayer.User.Update()
+	p.User.BeUnionedCount++
+	p.User.Update()
 }
 
 //Ununion is called when betray or one man dead

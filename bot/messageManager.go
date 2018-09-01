@@ -29,12 +29,23 @@ func (b *Bot) messageManager() {
 		case game := <-models.StartGameSuccess: // clear next game pm list
 			go b.onStartGameSuccess(game)
 		case game := <-models.GameTimeOutOperation: // edit some messages or other staff
+			go b.onGameTimeOutOperation(game)
 		case player := <-models.AbortPlayerHint:
 			go b.onAbortPlayerHint(player)
 		case game := <-models.GameChangeToDayHint:
 			go b.onGameChangeToDayHint(game)
 		case game := <-models.GameChangeToNightHint:
 			go b.onGameChangeToNightHint(game)
+		case player := <-models.ShootXHint:
+			go b.onShootXHint(player)
+		case player := <-models.ShootYHint:
+			go b.onShootYHint(player)
+		case players := <-models.UnionReqHint:
+			go b.onUnionReqHint(players)
+		case players := <-models.UnionAcceptHint:
+			go b.onUnionAcceptHint(players)
+		case players := <-models.UnionRejectHint:
+			go b.onUnionRejectHint(players)
 		case game := <-models.GameLoseHint:
 			go b.onGameLoseHint(game)
 		case game := <-models.WinGameHint:

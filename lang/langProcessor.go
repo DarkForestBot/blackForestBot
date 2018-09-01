@@ -12,32 +12,26 @@ import (
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 )
 
+//UserLang is
+var UserLang map[int64]string
+
 func init() {
+	UserLang = make(map[int64]string)
+
 	var users []models.User
-	var groups []models.TgGroup
 	if err := database.DB.Find(&users).Error; err != nil {
 		panic(err)
 	}
+	for _, user := range users {
+		UserLang[user.TgUserID] = user.Language
+	}
+
+	var groups []models.TgGroup
 	if err := database.DB.Find(&groups).Error; err != nil {
 		panic(err)
 	}
-	for i, user := range users {
-		if err := database.Redis.Set(
-			fmt.Sprintf(consts.LangSetFormatString, user.TgUserID),
-			user.Language, -1,
-		).Err(); err != nil {
-			panic(err)
-		}
-		log.Printf("Load user language set: %d/%d", i+1, len(users))
-	}
-	for i, group := range groups {
-		if err := database.Redis.Set(
-			fmt.Sprintf(consts.LangSetFormatString, group.TgGroupID),
-			group.Lang, -1,
-		).Err(); err != nil {
-			panic(err)
-		}
-		log.Printf("Load group language set: %d/%d", i+1, len(groups))
+	for _, group := range groups {
+		UserLang[group.TgGroupID] = group.Lang
 	}
 }
 
@@ -70,5 +64,4 @@ func T(langset, key string, args interface{}) string {
 		return fmt.Sprintf(consts.LangMissingFormatString, key)
 	}
 	return s.String()
-
 }

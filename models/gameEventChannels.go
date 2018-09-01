@@ -21,6 +21,11 @@ var (
 	PlayerBeastHint       chan *Player
 	GetPlayersHint        chan *Game
 	UserStatsHint         chan *User
+	ShootXHint            chan *Player
+	ShootYHint            chan *Player
+	UnionReqHint          chan []*Player //Player[0]: Src, Player[1]: Dst
+	UnionAcceptHint       chan []*Player
+	UnionRejectHint       chan []*Player
 )
 
 func init() {
@@ -43,4 +48,9 @@ func init() {
 	PlayerBeastHint = make(chan *Player, 1024)
 	GetPlayersHint = make(chan *Game, 1024)
 	UserStatsHint = make(chan *User, 1024)
+	ShootXHint = make(chan *Player, 1024)
+	ShootYHint = make(chan *Player, 1024)
+	UnionReqHint = make(chan []*Player, 1024)
+	UnionAcceptHint = make(chan []*Player, 1024)
+	UnionRejectHint = make(chan []*Player, 1024)
 }

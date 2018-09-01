@@ -13,6 +13,7 @@ import (
 	"git.wetofu.top/tonychee7000/blackForestBot/config"
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
+	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -61,12 +62,7 @@ func OnJoinAChat(msg *tgApi.Message) error {
 	).FirstOrCreate(group).Error; err != nil {
 		return err
 	}
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.LangSetFormatString, msg.Chat.ID),
-		group.Lang, -1,
-	).Err(); err != nil {
-		return err
-	}
+	lang.UserLang[group.TgGroupID] = group.Lang
 
 	log.Printf("Group `%s` registered.\n", group.Name)
 	OnJoinAChatEvent <- msg
@@ -115,6 +111,8 @@ func OnReceiveAnimation(msg *tgApi.Message) error {
 		config.DefaultImages.Killed = fileID
 	case "trapped":
 		config.DefaultImages.Trapped = fileID
+	case "beast":
+		config.DefaultImages.Beast = fileID
 	}
 	appPath, _ := filepath.Abs(path.Dir(os.Args[0]))
 	log.Printf("Find config in `%s`\n", appPath)
@@ -139,12 +137,7 @@ func onStart(msg *tgApi.Message, args ...string) error {
 	).FirstOrCreate(user).Error; err != nil {
 		return err
 	}
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.LangSetFormatString, msg.From.ID),
-		user.Language, -1,
-	).Err(); err != nil {
-		return err
-	}
+	lang.UserLang[user.TgUserID] = user.Language
 	log.Printf("User `%s(%d)` registered.\n", user.Name, user.TgUserID)
 
 	if args != nil && len(args) != 0 {

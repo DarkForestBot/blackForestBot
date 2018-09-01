@@ -13,10 +13,12 @@ type Images struct {
 	Win     string
 	Lose    string
 	Start   string
+	Beast   string
 	Killed  string
 	Trapped string
 }
 
+// DefaultImages is
 var DefaultImages Images
 
 func (i *Images) ReadConfig(cfgFile string) error {

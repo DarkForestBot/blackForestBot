@@ -171,6 +171,15 @@ func (g *Game) GetPlayer(tgUserID int64) *Player {
 	return nil
 }
 
+func (g *Game) GetPosition(x, y int) *Position {
+	for _, pos := range g.Positions {
+		if pos.CheckPosition(x, y) {
+			return pos
+		}
+	}
+	return nil
+}
+
 // AttachOperation is
 func (g *Game) AttachOperation(op *Operation) {
 	g.Operations = append(g.Operations, op)
@@ -230,7 +239,7 @@ func (g *Game) gameTimeCheck() {
 
 	//Step II: check who has no action and sent abort()
 	for _, p := range g.findAbort() {
-		g.Operations = append(g.Operations, p.Abort())
+		g.AttachOperation(p.Abort())
 		AbortPlayerHint <- p
 	}
 	//Step III: check and change phase
@@ -298,8 +307,11 @@ func (g *Game) settleStageTag() {
 			}
 		case Abort:
 			if opeartion.Player.Status < PlayerStatusBeast {
-				if rand.Intn(3) == 0 {
+				fate := rand.Intn(3)
+				if fate == 0 {
 					opeartion.Player.StatusChange(PlayerStatusBeast)
+				} else if fate == 1 {
+					opeartion.Player.Kill(Flee)
 				}
 			} else {
 				if rand.Intn(2) == 0 {
@@ -464,7 +476,7 @@ func (g *Game) makePlayer() {
 		y = append(y[:n], y[n+1:]...)
 
 		for _, pos := range g.Positions {
-			if pos.FindPosition(xi, yi) {
+			if pos.CheckPosition(xi, yi) {
 				player := NewPlayer(user, pos)
 				pos.BindPlayer(player) // Two-way binding
 				g.Players = append(g.Players, player)

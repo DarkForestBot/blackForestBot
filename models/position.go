@@ -22,8 +22,8 @@ func (p *Position) IsPosition(pos *Position) bool {
 	return pos == p || (pos.X == p.X && pos.Y == p.Y)
 }
 
-//FindPosition is
-func (p *Position) FindPosition(x, y int) bool {
+//CheckPosition is
+func (p *Position) CheckPosition(x, y int) bool {
 	return p.X == x && p.Y == y
 }
 

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
+	"sync"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
@@ -20,6 +22,14 @@ func init() {
 	InlineQueryList = make(map[string]inlineQueryFunc)
 	InlineQueryList["setlang"] = btnSetLang
 	InlineQueryList["cancelgame"] = btnCancelGame
+	InlineQueryList["x"] = btnShootOne // data: "x=po,groupid"
+	InlineQueryList["y"] = btnShootTwo
+	InlineQueryList["unionreq"] = btnUnionReq
+	InlineQueryList["unionaccept"] = btnUnionAccept
+	InlineQueryList["unionreject"] = btnUnionReject
+	InlineQueryList["betray"] = btnBetray
+	InlineQueryList["trap"] = btnTrap
+	InlineQueryList["abort"] = btnAbort
 }
 
 func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
@@ -63,10 +73,6 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		MessageID: act.Message.MessageID,
 	}
 	LanguageChangedEvent <- act
-	/*
-		if _, err := markdownMessage(act.Message.Chat.ID, "langchanged", bot, nil); err != nil {
-			return err
-		}*/
 	return nil
 }
 
@@ -97,4 +103,192 @@ func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
 		MessageID: act.Message.MessageID,
 	}
 	return nil
+}
+
+func btnShootOne(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	x, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	player := gameList[ID].GetPlayer(int64(act.From.ID))
+	if player == nil {
+		return errors.New("No such player found")
+	}
+
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+
+	player.ShootX = x
+	models.ShootXHint <- player
+	return nil
+}
+
+func btnShootTwo(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	y, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	game := gameList[ID]
+	player := game.GetPlayer(int64(act.From.ID))
+	if player == nil {
+		return errors.New("No such player found")
+	}
+
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+
+	player.ShootY = y
+	pos := game.GetPosition(player.ShootX, player.ShootY)
+	if pos == nil {
+		return errors.New("Shoot outta map")
+	}
+	game.AttachOperation(player.Shoot(false, pos))
+
+	models.ShootYHint <- player
+	return nil
+}
+
+func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	userID, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	if srcPlayer == nil {
+		return errors.New("No such source player")
+	}
+
+	targetPlayer := gameList[ID].GetPlayer(userID)
+	if targetPlayer == nil {
+		return errors.New("No such target player")
+	}
+
+	models.UnionReqHint <- []*models.Player{srcPlayer, targetPlayer}
+
+	return nil
+}
+
+func btnUnionAccept(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	userID, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	if srcPlayer == nil {
+		return errors.New("No such source player")
+	}
+
+	targetPlayer := gameList[ID].GetPlayer(userID)
+	if targetPlayer == nil {
+		return errors.New("No such target player")
+	}
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+
+	targetPlayer.Union(srcPlayer)
+	models.UnionAcceptHint <- []*models.Player{srcPlayer, targetPlayer}
+	return nil
+}
+
+func btnUnionReject(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	userID, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	srcPlayer := gameList[ID].GetPlayer(int64(act.From.ID))
+	if srcPlayer == nil {
+		return errors.New("No such source player")
+	}
+
+	targetPlayer := gameList[ID].GetPlayer(userID)
+	if targetPlayer == nil {
+		return errors.New("No such target player")
+	}
+	models.UnionRejectHint <- []*models.Player{srcPlayer, targetPlayer}
+	return nil
+}
+
+func btnBetray(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+	game := gameList[ID]
+	player := game.GetPlayer(int64(act.From.ID))
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+	game.AttachOperation(player.Shoot(true, nil))
+	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+}
+
+func btnTrap(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+	game := gameList[ID]
+	player := game.GetPlayer(int64(act.From.ID))
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+	player.TrapSet == true
+	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+}
+
+func btnAbort(arg string, act *tgApi.CallbackQuery) error {
+	args := strings.SplitN(arg, ",", 2)
+	ID, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return err
+	}
+	game := gameList[ID]
+	player := game.GetPlayer(int64(act.From.ID))
+	var lock sync.Mutex
+	lock.Lock()
+	game.AttachOperation(player.Abort())
+	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
 }

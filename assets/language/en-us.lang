@@ -31,6 +31,11 @@ trans:accept=Accept
 trans:reject=Reject
 trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna be union with you. Do you want to accept with it?
 trans:unionhint=Now you can choose one player to make a union, who do you want?
+trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) has accepted your request.
+trans:unionfailed=Union failed
+trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
+trans:operhint1=Now, decide your action!\nNumeric is one axis of a position, you need 2 times for shooting at the position\n(Abort: abort all operations this night, all will be decide by fate.)
+trans:operhint2=OK, now you can choose another axis of a position.
 trans:skip=Skip
 trans:onday=Now is day and every player can choose another one for a union. Go ahead!
 trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!
@@ -39,7 +44,7 @@ trans:trap=Trap
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
 trans:lose=#Lose Oops! NO ONE live
 trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}\n[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
-trans:timeout=Time out!
+trans:timeout=Time out! Your fate choose your life!
 trans:joinachat=Hello everyone, I am a bot which play a game called `DarkForest` like PUBG.\n/help Show help.
 trans:receivegif=Got image`{{.}}`
 trans:onstart=Hi, you have registered successfully.
@@ -50,3 +55,4 @@ trans:killed2=You was trapped when you are shooting at your friend...\n*Now You 
 trans:killed3=You was hit by a meteor...\n*Now You DEAD!*
 trans:killed4=A beast rushed to you when you a shooting at it...\n*Now You DEAD!*
 trans:killed5=You killed it, but you are suffering heavy wound...\n*Now You DEAD!*
+trans:abort=Abort
