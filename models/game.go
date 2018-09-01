@@ -171,6 +171,7 @@ func (g *Game) GetPlayer(tgUserID int64) *Player {
 	return nil
 }
 
+//GetPosition is
 func (g *Game) GetPosition(x, y int) *Position {
 	for _, pos := range g.Positions {
 		if pos.CheckPosition(x, y) {
