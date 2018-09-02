@@ -9,18 +9,18 @@ const maxAchivementLevel = 5
 
 //List of achivement code
 const (
-	AchivementGamesJoined = iota
-	AchivementGamesWon
-	AchivementShoot
-	AchivementBetray
-	AchivementKill
-	AchivementGuessKill
-	AchivementSniperKill
-	AchivementKilledByTrap
-	AchivementTrap
-	AchivementUnion
-	AchivementUnionSuccess
-	AchivementBeUnioned
+	AchivementGamesJoined  = iota // 0
+	AchivementGamesWon            // 1
+	AchivementShoot               // 2
+	AchivementBetray              // 3
+	AchivementKill                // 4
+	AchivementGuessKill           // 5
+	AchivementSniperKill          // 6
+	AchivementKilledByTrap        // 7
+	AchivementTrap                // 8
+	AchivementUnion               // 9
+	AchivementUnionSuccess        // 10
+	AchivementBeUnioned           // 11
 )
 
 // User is used in database

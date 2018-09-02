@@ -27,8 +27,8 @@ trans:ok=OK
 trans:noenoughplayers=At least *6* players to start a game!
 trans:langchanged=OK! I will show message in English.
 trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{if ne .GamesJoined 0}}{{.GamesWon * 100 / .GamesJoined }}%{{else}}-{{end}}\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
-trans:accept=Accept
-trans:reject=Reject
+trans:accept=✅Accept
+trans:reject=❎Reject
 trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna be union with you. Do you want to accept with it?
 trans:unionhint=Now you can choose one player to make a union, who do you want?
 trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) has accepted your request.
@@ -57,4 +57,76 @@ trans:killed4=A beast rushed to you when you a shooting at it...\n*Now You DEAD!
 trans:killed5=You killed it, but you are suffering heavy wound...\n*Now You DEAD!*
 trans:abort=Abort
 trans:achivementrewarded=Congratulations, you have rewarded achivement *{{.}}*!
-trans:achivement000=balh
+
+# TODO: if any good idea, just go ahead.
+trans:achivement000=Game Join I
+trans:achivement001=Game Join II
+trans:achivement002=Game Join III
+trans:achivement003=Game Join IV
+trans:achivement004=Game Join V
+
+trans:achivement010=Game Won I
+trans:achivement011=Game Won II
+trans:achivement012=Game Won III
+trans:achivement013=Game Won IV
+trans:achivement014=Game Won V
+
+trans:achivement020=Shooter I
+trans:achivement021=Shooter II
+trans:achivement022=Shooter III
+trans:achivement023=Shooter IV
+trans:achivement024=Shooter V
+
+trans:achivement030=Traitor I
+trans:achivement031=Traitor II
+trans:achivement032=Traitor III
+trans:achivement033=Traitor IV
+trans:achivement034=Traitor V
+
+trans:achivement040=Kill I
+trans:achivement041=Kill II
+trans:achivement042=Kill III
+trans:achivement043=Kill IV
+trans:achivement044=Kill V
+
+trans:achivement050=Kill by Guess I
+trans:achivement051=Kill by Guess II
+trans:achivement052=Kill by Guess III
+trans:achivement053=Kill by Guess IV
+trans:achivement054=Kill by Guess V
+
+trans:achivement060=Sniper I
+trans:achivement061=Sniper II
+trans:achivement062=Sniper III
+trans:achivement063=Sniper IV
+trans:achivement064=Sniper V
+
+trans:achivement070=Be Trapped I
+trans:achivement071=Be Trapped II
+trans:achivement072=Be Trapped III
+trans:achivement073=Be Trapped IV
+trans:achivement074=Be Trapped V
+
+trans:achivement080=Set Trap I
+trans:achivement081=Set Trap II
+trans:achivement082=Set Trap III
+trans:achivement083=Set Trap IV
+trans:achivement084=Set Trap V
+
+trans:achivement090=Union Request I
+trans:achivement091=Union Request II
+trans:achivement092=Union Request III
+trans:achivement093=Union Request IV
+trans:achivement094=Union Request V
+
+trans:achivement100=Union Success I
+trans:achivement101=Union Success II
+trans:achivement102=Union Success III
+trans:achivement103=Union Success IV
+trans:achivement104=Union Success V
+
+trans:achivement110=Be Unioned I 
+trans:achivement111=Be Unioned II
+trans:achivement112=Be Unioned III
+trans:achivement113=Be Unioned IV
+trans:achivement114=Be Unioned V

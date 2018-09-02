@@ -18,8 +18,14 @@ for root, dir, file in os.walk(join(BUILD_PATH, 'assets', 'language')):
 
         for i in open(join(root, lang), 'r'):
             i = i.replace('\r', '').replace('\n', '')
+            if i.strip() == "":
+                continue
+            if i[0] == "#":  # comment
+                continue
+
             op = i.split('=', 1)[0].strip()
             val = i.split('=', 1)[1]
+            
             if op.split(':', 1)[0] == 'meta':
                 if op.split(':', 1)[1] == 'language':
                     LANGNAME = val

@@ -5,6 +5,7 @@ import (
 
 	"git.wetofu.top/tonychee7000/blackForestBot/bot"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
+	"git.wetofu.top/tonychee7000/blackForestBot/utils"
 )
 
 func init() {
@@ -15,6 +16,6 @@ func init() {
 func main() {
 	defer database.DB.Close()
 	defer database.Redis.Close()
-
+	utils.DummyForLoad = 0
 	bot.DefaultBot.Run()
 }

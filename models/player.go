@@ -40,6 +40,7 @@ var reasonStrings = []string{
 	"shot",
 	"betrayed",
 	"trapped",
+	"flee",
 	"eaten by a beast",
 	"beasts killed each other",
 }
