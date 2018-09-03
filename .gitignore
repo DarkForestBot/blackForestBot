@@ -4,3 +4,5 @@ basis/images.go
 blackForestBot
 images.dat
 config.json
+*.tgz
+*.sql
