@@ -19,7 +19,7 @@ func NewPosition(x, y int) *Position {
 
 //IsPosition is
 func (p *Position) IsPosition(pos *Position) bool {
-	return pos == p || (pos.X == p.X && pos.Y == p.Y)
+	return pos == p || p.CheckPosition(pos.X, pos.Y)
 }
 
 //CheckPosition is

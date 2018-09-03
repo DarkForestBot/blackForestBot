@@ -17,6 +17,7 @@ trans:jointime={{.}} Left! Be quick!
 trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) has joined the game.
 trans:joinsuccess=You have joined game in {{.Name}} successfully.
 trans:onplayers=Here is the players joined.
+trans:getposition=Your position is `({{.Position.X}}, {{.Position.Y}})`\n*DO NOT TELL OTHERS!*
 trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) has left this dangerous place.
 trans:noflee=[{{.Name}}](tg://user?id={{.TgUserID}}): It's too late to leave here!
 trans:setlang=Which language do you need?

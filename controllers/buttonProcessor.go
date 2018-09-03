@@ -71,6 +71,9 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 }
 
 func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
+	if arg == "" {
+		return errors.New("Bad game id")
+	}
 	ID, err := strconv.ParseInt(arg, 10, 64)
 	if err != nil {
 		return err
@@ -171,6 +174,11 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 		return err
 	}
 
+	// unionreq for none, means skip
+	if args[0] == "" {
+		return nil
+	}
+
 	userID, err := strconv.ParseInt(args[0], 10, 64)
 	if err != nil {
 		return err
@@ -201,6 +209,11 @@ func btnUnionAccept(arg string, act *tgApi.CallbackQuery) error {
 	ID, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil {
 		return err
+	}
+
+	// No one selected.
+	if args[0] == "" {
+		return nil
 	}
 
 	userID, err := strconv.ParseInt(args[0], 10, 64)
@@ -236,6 +249,10 @@ func btnUnionReject(arg string, act *tgApi.CallbackQuery) error {
 	ID, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil {
 		return err
+	}
+
+	if args[0] == "" {
+		return nil
 	}
 
 	userID, err := strconv.ParseInt(args[0], 10, 64)
@@ -274,7 +291,7 @@ func btnBetray(arg string, act *tgApi.CallbackQuery) error {
 	player := game.GetPlayer(int64(act.From.ID))
 	game.AttachOperation(player.Shoot(true, nil))
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
-		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
 	return nil
 }
 
@@ -291,7 +308,7 @@ func btnTrap(arg string, act *tgApi.CallbackQuery) error {
 	player := game.GetPlayer(int64(act.From.ID))
 	player.TrapSet = true
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
-		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
 	return nil
 }
 
@@ -308,6 +325,6 @@ func btnAbort(arg string, act *tgApi.CallbackQuery) error {
 	player := game.GetPlayer(int64(act.From.ID))
 	game.AttachOperation(player.Abort())
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
-		ID, player.OperationMsg, tgApi.InlineKeyboardMarkup{})
+		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
 	return nil
 }

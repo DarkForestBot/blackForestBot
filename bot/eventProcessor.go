@@ -183,6 +183,14 @@ func (b *Bot) onStartGameSuccess(game *models.Game) {
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
+	for _, player := range game.Players {
+		if _, err := b.MarkdownMessage(
+			player.User.TgUserID, player.User.Language,
+			"getposition", player,
+		); err != nil {
+			log.Println("ERROR:", err)
+		}
+	}
 }
 
 func (b *Bot) onGameTimeOutOperation(game *models.Game) {
@@ -375,10 +383,12 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 	)
 
 	// Step II: req has sent
-	b.MarkdownMessage(
+	if _, err := b.MarkdownMessage(
 		players[0].User.TgUserID, players[0].User.Language,
 		"unionreqsent", players[1].User,
-	)
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
 
 	// Step III: send request
 	nmsg, err := b.MarkdownMessage(
@@ -491,8 +501,8 @@ func (b *Bot) onGameLoseHint(game *models.Game) {
 	defer releaseThreadPool()
 	langSet := game.TgGroup.Lang
 	if _, err := b.GifMessage(
-		game.TgGroup.TgGroupID, langSet, config.DefaultImages.Lose,
-		"lose", nil,
+		game.TgGroup.TgGroupID, langSet, "lose",
+		config.DefaultImages.Lose, nil,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -503,8 +513,8 @@ func (b *Bot) onWinGameHint(game *models.Game) {
 	defer releaseThreadPool()
 	langSet := game.TgGroup.Lang
 	if _, err := b.GifMessage(
-		game.TgGroup.TgGroupID, langSet, config.DefaultImages.Win,
-		"win", game.Winner,
+		game.TgGroup.TgGroupID, langSet, "win",
+		config.DefaultImages.Win, game.Winner,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}

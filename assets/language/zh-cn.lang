@@ -17,6 +17,7 @@ trans:jointime=游戏还有 {{.}} 可以加入，要快！
 trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) 加入了游戏
 trans:joinsuccess=你已成功加入到 {{.Name}} 的游戏中
 trans:onplayers=这里是玩家名单
+trans:getposition=你的坐标是 `({{.Position.X}}, {{.Position.Y}})`\n*不要告诉其他人！*
 trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) 离开了这个危险的地方
 trans:noflee=[{{.Name}}](tg://user?id={{.TgUserID}}) 在森林里迷路了，无法离开
 trans:setlang=你需要哪种语言？

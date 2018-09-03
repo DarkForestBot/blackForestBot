@@ -496,11 +496,13 @@ func (g *Game) makeField() ([]int, []int) {
 	x := make([]int, 0)
 	y := make([]int, 0)
 	lenuser := len(g.Users)
-	for i := 0; i < 4*lenuser; i++ {
-		pos := NewPosition(i/(2*lenuser), i%(2*lenuser))
+	for i := 0; i < 4*lenuser*lenuser; i++ {
+		xi := i / (2 * lenuser)
+		yi := i % (2 * lenuser)
+		pos := NewPosition(xi, yi)
 		g.Positions = append(g.Positions, pos)
-		x = append(x, i/(2*lenuser))
-		y = append(y, i%(2*lenuser))
+		x = append(x, xi)
+		y = append(y, xi)
 	}
 	return x, y
 }
@@ -508,8 +510,6 @@ func (g *Game) makeField() ([]int, []int) {
 func (g *Game) makePlayer() {
 	x, y := g.makeField()
 	for _, user := range g.Users {
-		user.GamesJoined++
-		user.Update()
 		rand.Seed(time.Now().Unix())
 		n := rand.Intn(len(x))
 		xi := x[n]
