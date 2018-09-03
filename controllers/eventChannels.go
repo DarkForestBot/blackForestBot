@@ -22,6 +22,7 @@ var (
 	DeleteMessageEvent       chan tgApi.DeleteMessageConfig
 	RemoveMessageMarkUpEvent chan tgApi.EditMessageReplyMarkupConfig
 	EditMessageTextEvent     chan tgApi.EditMessageTextConfig
+	NoGameEvent              chan *tgApi.Message
 )
 
 func init() {
@@ -43,4 +44,5 @@ func init() {
 	DeleteMessageEvent = make(chan tgApi.DeleteMessageConfig, 1024)
 	RemoveMessageMarkUpEvent = make(chan tgApi.EditMessageReplyMarkupConfig, 1024)
 	EditMessageTextEvent = make(chan tgApi.EditMessageTextConfig, 1024)
+	NoGameEvent = make(chan *tgApi.Message, 1024)
 }

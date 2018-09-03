@@ -92,6 +92,8 @@ func (b *Bot) messageManager() {
 			go b.onNextGameEvent(msg)
 		case msg := <-controllers.RegisterNeededEvent:
 			go b.onRegisterNeededEvent(msg)
+		case msg := <-controllers.NoGameEvent:
+			go b.onNoGameEvent(msg)
 		case act := <-controllers.LanguageChangedEvent:
 			go b.onLanguageChangedEvent(act)
 		case deleteConf := <-controllers.DeleteMessageEvent:

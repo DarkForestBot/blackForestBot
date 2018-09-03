@@ -160,7 +160,6 @@ func onStartGame(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID < 0 {
 		user, err := models.GetUser(int64(msg.From.ID))
 		if err != nil {
-
 			return err
 		}
 		group, err := models.GetTgGroup(msg.Chat.ID)
@@ -231,6 +230,8 @@ func onExtend(msg *tgApi.Message, args ...string) error {
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
 		game.Extend(eta)
+	} else {
+		NoGameEvent <- msg
 	}
 	return nil
 }
@@ -244,6 +245,8 @@ func onPlayers(msg *tgApi.Message, args ...string) error {
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
 		game.HintPlayers()
+	} else {
+		NoGameEvent <- msg
 	}
 	return nil
 }
@@ -260,6 +263,8 @@ func onFlee(msg *tgApi.Message, args ...string) error {
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
 		game.Flee(user)
+	} else {
+		NoGameEvent <- msg
 	}
 	return nil
 }
@@ -322,6 +327,8 @@ func onForceStart(msg *tgApi.Message, arg ...string) error {
 		if ok && game != nil {
 			return game.ForceStart()
 		}
+		NoGameEvent <- msg
+		return errors.New("No game found")
 	}
 	GroupOnlyEvent <- msg
 	return errors.New("Group only")

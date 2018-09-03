@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ const (
 	GameOver       GameStatus = 2
 	GameIsDay                 = true
 	GameIsNight               = !GameIsDay
-	GameMinPlayers            = 6
+	GameMinPlayers            = 3
 )
 
 type msgSent struct {
@@ -159,6 +160,7 @@ func (g *Game) ForceStart() error {
 		NotEnoughPlayersHint <- g
 		return err
 	}
+	StartGameSuccess <- g
 	return nil
 }
 
@@ -247,15 +249,19 @@ func (g *Game) joinTimeCheck() {
 
 func (g *Game) gameTimeCheck() {
 	if g.TimeLeft != 0 {
-		return
+		if g.IsDay || len(g.Operations) != len(g.Players) {
+			return
+		}
 	}
 	//Step I: editMessage sent.
 	GameTimeOutOperation <- g
 
 	//Step II: check who has no action and sent abort()
 	for _, p := range g.findAbort() {
-		g.AttachOperation(p.Abort())
-		AbortPlayerHint <- p
+		if !g.IsDay {
+			g.AttachOperation(p.Abort())
+			AbortPlayerHint <- p
+		}
 	}
 	//Step III: check and change phase
 	var lock sync.RWMutex
@@ -282,6 +288,7 @@ func (g *Game) winloseCheck() {
 			pl = append(pl, player)
 		}
 	}
+	log.Println("Current live:", pl)
 	if len(pl) == 0 { // All Dead
 		GameLoseHint <- g
 		g.Status = GameOver

@@ -21,6 +21,7 @@ trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) has left this dangerous place
 trans:noflee=[{{.Name}}](tg://user?id={{.TgUserID}}): It's too late to leave here!
 trans:setlang=Which language do you need?
 trans:hasgame=There has already had a game.
+trans:nogame=There no game available, use /startgame to make new one.
 trans:gamequeue=You have already in the queue of {{.}}.\nWhen game start, I will PM you!
 trans:newgame=There is a new game in {{.}}\nGo quickly!
 trans:cancel=Cancel
@@ -38,14 +39,15 @@ trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
 trans:operhint1=Now, decide your action!\nNumeric is one axis of a position, you need 2 times for shooting at the position\n(Abort: abort all operations this night, all will be decide by fate.)
 trans:operhint2=OK, now you can choose another axis of a position.
 trans:skip=Skip
-trans:onday=Now is day and every player can choose another one for a union. Go ahead!
-trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!
+trans:onday=Now is day and every player can choose another one for a union. Go ahead!\nYou have 120 seconds to take action.
+trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!\nYou have 60 seconds to take action.
 trans:betray=Betray
 trans:trap=Trap
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
 trans:lose=#Lose Oops! NO ONE live
-trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}\n[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
-trans:timeout=Time out! Your fate choose your life!
+trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
+trans:timeoutnight=Time out! Your fate choose your life!
+trans:timeoutday=It's sunset now. stop finding your pal.
 trans:joinachat=Hello everyone, I am a bot which play a game called `DarkForest` like PUBG.\n/help Show help.
 trans:receivegif=Got image`{{.}}`
 trans:onstart=Hi, you have registered successfully.

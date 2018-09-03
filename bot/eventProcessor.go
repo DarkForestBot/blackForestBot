@@ -223,6 +223,13 @@ func (b *Bot) onGameTimeOutOperation(game *models.Game) {
 			}
 			player.UnionReqRecv = []*models.UnionReqRecv{}
 		}
+		if game.IsDay {
+			if _, err := b.MarkdownMessage(
+				player.User.TgUserID, player.User.Language, "timeoutday", nil,
+			); err != nil {
+				log.Println("ERROR:", err)
+			}
+		}
 	}
 }
 
@@ -231,7 +238,7 @@ func (b *Bot) onAbortPlayerHint(player *models.Player) {
 	defer releaseThreadPool()
 	langSet := player.User.Language
 	if _, err := b.MarkdownMessage(
-		player.User.TgUserID, langSet, "timeout", nil,
+		player.User.TgUserID, langSet, "timeoutnight", nil,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -243,6 +250,11 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 	langSet := game.TgGroup.Lang
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "onday", nil,
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+	if _, err := b.MarkdownMessage(
+		game.TgGroup.TgGroupID, langSet, "gameplayers", game,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -283,6 +295,11 @@ func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 	for _, player := range game.Players {
 		if player.Live {
 			langSet = player.User.Language
+			if _, err := b.MarkdownMessage(
+				player.User.TgUserID, langSet, "gameplayers", game,
+			); err != nil {
+				log.Println("ERROR:", err)
+			}
 			msg, err := b.MarkdownMessage(
 				player.User.TgUserID, langSet, "operhint1", nil,
 				makeNightOperations(game.TgGroup.TgGroupID, player, 0),
@@ -360,12 +377,12 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 	// Step II: req has sent
 	b.MarkdownMessage(
 		players[0].User.TgUserID, players[0].User.Language,
-		"unionreqsent", players[1],
+		"unionreqsent", players[1].User,
 	)
 
 	// Step III: send request
 	nmsg, err := b.MarkdownMessage(
-		players[1].User.TgUserID, langSet, "unionreq", players[0], mk,
+		players[1].User.TgUserID, langSet, "unionreq", players[0].User, mk,
 	)
 	if err != nil {
 		log.Println("ERROR:", err)
@@ -381,18 +398,18 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-
+	// 0: button clicker, 1: reply to
 	if _, err := b.MarkdownMessage(
-		players[0].User.TgUserID, players[0].User.Language, "unionsuccess", players[1],
+		players[1].User.TgUserID, players[1].User.Language, "unionsuccess", players[0].User,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
 
-	for _, msg := range players[1].UnionReqRecv {
+	for _, msg := range players[0].UnionReqRecv {
 		controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 		)
-		if msg.From != players[0] {
+		if msg.From != players[1] {
 			if _, err := b.MarkdownMessage(
 				msg.From.User.TgUserID, msg.From.User.Language, "unionfailed", nil,
 			); err != nil {
@@ -403,24 +420,25 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
-	players[1].UnionReqRecv = []*models.UnionReqRecv{}
+	players[0].UnionReqRecv = []*models.UnionReqRecv{}
 }
 
 func (b *Bot) onUnionRejectHint(players []*models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	// 0: button clicker, 1: reply to
 	if _, err := b.MarkdownMessage(
-		players[0].User.TgUserID, players[0].User.Language, "unionfailed", nil,
+		players[1].User.TgUserID, players[1].User.Language, "unionfailed", nil,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
-	for i, msg := range players[1].UnionReqRecv {
-		if msg.From == players[0] {
+	for i, msg := range players[0].UnionReqRecv {
+		if msg.From == players[1] {
 			controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 				msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 			)
 			//Remove this msg from UnionReqRecv
-			players[1].UnionReqRecv = append(players[1].UnionReqRecv[:i], players[1].UnionReqRecv[i+1:]...)
+			players[0].UnionReqRecv = append(players[0].UnionReqRecv[:i], players[0].UnionReqRecv[i+1:]...)
 		}
 	}
 }
@@ -746,6 +764,15 @@ func (b *Bot) onRegisterNeededEvent(msg *tgApi.Message) {
 	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownReply(
 		msg.Chat.ID, langSet, "registerneeded",
+		msg.MessageID, nil); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onNoGameEvent(msg *tgApi.Message) {
+	langSet := getLang(msg.Chat.ID)
+	if _, err := b.MarkdownReply(
+		msg.Chat.ID, langSet, "nogame",
 		msg.MessageID, nil); err != nil {
 		log.Println("ERROR:", err)
 	}
