@@ -52,7 +52,7 @@ func OnJoinAChat(msg *tgApi.Message) error {
 	if err := database.DB.Where(models.TgGroup{TgGroupID: msg.Chat.ID}).Assign(
 		models.TgGroup{
 			Name: msg.Chat.Title,
-			Admin: models.User{
+			Admin: &models.User{
 				TgUserID:   int64(msg.From.ID),
 				Name:       fmt.Sprintf("%s %s", msg.From.FirstName, msg.From.LastName),
 				TgUserName: msg.From.UserName,
@@ -140,7 +140,7 @@ func onStart(msg *tgApi.Message, args ...string) error {
 	lang.UserLang[user.TgUserID] = user.Language
 	log.Printf("User `%s(%d)` registered.\n", user.Name, user.TgUserID)
 
-	if args != nil && len(args) != 0 {
+	if args != nil && len(args) != 0 && args[0] != "" {
 		id, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
 			return err
@@ -160,6 +160,7 @@ func onStartGame(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID < 0 {
 		user, err := models.GetUser(int64(msg.From.ID))
 		if err != nil {
+
 			return err
 		}
 		group, err := models.GetTgGroup(msg.Chat.ID)

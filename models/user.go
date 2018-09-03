@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -91,6 +93,11 @@ func (u *User) CheckAchivement() {
 	u.achivementCheck(&(u.UnionAchive), AchivementUnion, u.UnionCount, 10, 10, true)
 	u.achivementCheck(&(u.UnionSuccessAchive), AchivementUnionSuccess, u.UnionSuccessCount, 0, 10, false)
 	u.achivementCheck(&(u.BeUnionedAchive), AchivementBeUnioned, u.BeUnionedCount, 5, 20, true)
+}
+
+func (u *User) String() string {
+	return fmt.Sprintf("User(TgUserID=%d TgUserName=`%s` Name=`%s` Language=`%s`)",
+		u.TgUserID, u.TgUserName, u.Name, u.Language)
 }
 
 func (u *User) achivementCheck(achivementLevel *int, achivement, count, base, times int, greaterOrEqual bool) {

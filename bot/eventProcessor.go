@@ -92,7 +92,7 @@ func (b *Bot) onUserJoinHint(user *models.User) {
 	//Setp II: PM user join success.
 	langSet = user.Language
 	if _, err := b.MarkdownMessage(
-		user.TgUserID, langSet, "joingame", user.TgGroupJoinGame,
+		user.TgUserID, langSet, "joinsuccess", user.TgGroupJoinGame,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -140,7 +140,7 @@ func (b *Bot) onJoinTimeLeftHint(game *models.Game) {
 	langSet := game.TgGroup.Lang
 	msg, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "jointime",
-		fmt.Sprintf("%d:%d", game.TimeLeft/60, game.TimeLeft%60),
+		fmt.Sprintf("%02d:%02d", game.TimeLeft/60, game.TimeLeft%60),
 		joinButton(game.TgGroup.TgGroupID, b),
 	)
 	if err != nil {
@@ -736,7 +736,17 @@ func (b *Bot) onRemoveMessageMarkUpEvent(c tgApi.EditMessageReplyMarkupConfig) {
 func (b *Bot) onEditMessageTextEvent(c tgApi.EditMessageTextConfig) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	c.ParseMode = tgApi.ModeMarkdown
 	if _, err := b.Send(c); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onRegisterNeededEvent(msg *tgApi.Message) {
+	langSet := getLang(msg.Chat.ID)
+	if _, err := b.MarkdownReply(
+		msg.Chat.ID, langSet, "registerneeded",
+		msg.MessageID, nil); err != nil {
 		log.Println("ERROR:", err)
 	}
 }

@@ -90,6 +90,8 @@ func (b *Bot) messageManager() {
 			go b.onSetLangMsgEvent(msg)
 		case msg := <-controllers.NextGameEvent:
 			go b.onNextGameEvent(msg)
+		case msg := <-controllers.RegisterNeededEvent:
+			go b.onRegisterNeededEvent(msg)
 		case act := <-controllers.LanguageChangedEvent:
 			go b.onLanguageChangedEvent(act)
 		case deleteConf := <-controllers.DeleteMessageEvent:

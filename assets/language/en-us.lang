@@ -4,12 +4,13 @@ trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Grou
 trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
 trans:startgame=[{{.Name}}](tg://user?id={{.TgUserID}}) leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
 trans:join=Join
+trans:registerneeded=You need to start a private chat to me, and `/start` it.
 trans:grouponly=This command is used in a group *ONLY*.
 trans:chatonly=This command is used in a private chat *ONLY*
 trans:badpassword=Invalid password.
 trans:adminon=Admin mode *ON*.\nTo leave admin mode, use \admin without any argument.
 trans:adminoff=Admin mode *OFF*.
-trans:players=#Players: {{len .}}\n{{range .}}\n[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
+trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
 trans:gamecancelled=No enough players joined, game cancelled.
 trans:gamestart=Game start!
 trans:jointime={{.}} Left! Be quick!
@@ -73,7 +74,7 @@ trans:achivement014=Game Won V
 
 trans:achivement020=Shooter I
 trans:achivement021=Shooter II
-trans:achivement022=Shooter III
+trans:achivement022=Shooter III
 trans:achivement023=Shooter IV
 trans:achivement024=Shooter V
 

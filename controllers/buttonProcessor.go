@@ -3,9 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
+
+	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
@@ -38,22 +41,18 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		if err != nil {
 			return err
 		}
-		if int64(act.Message.From.ID) != group.Admin.TgUserID {
+		log.Println("DEBUG:", group)
+		if int64(act.From.ID) != group.Admin.TgUserID {
 			return errors.New("No permission to change language")
 		}
 		group.Lang = arg
 		if err := group.Update(); err != nil {
 			return err
 		}
-		if err := database.Redis.Set(
-			fmt.Sprintf(consts.LangSetFormatString, act.Message.Chat.ID),
-			arg, -1,
-		).Err(); err != nil {
-			return err
-		}
+		lang.UserLang[act.Message.Chat.ID] = arg
 
 	} else if act.Message.Chat.ID > 0 {
-		user, err := models.GetUser(int64(act.Message.From.ID))
+		user, err := models.GetUser(int64(act.Message.Chat.ID))
 		if err != nil {
 			return err
 		}
@@ -61,12 +60,7 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		if err := user.Update(); err != nil {
 			return err
 		}
-		if err := database.Redis.Set(
-			fmt.Sprintf(consts.LangSetFormatString, act.Message.From.ID),
-			arg, -1,
-		).Err(); err != nil {
-			return err
-		}
+		lang.UserLang[act.Message.Chat.ID] = arg
 	}
 	DeleteMessageEvent <- tgApi.DeleteMessageConfig{
 		ChatID:    act.Message.Chat.ID,

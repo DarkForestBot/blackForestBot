@@ -71,7 +71,6 @@ func NewGame(tg *TgGroup, founder *User) *Game {
 
 	game.Cron = cron.New()
 	game.Cron.AddFunc("@every 1s", game.RunCheck)
-	game.Cron.AddFunc("@every 5s", game.sendPlayers)
 	game.Cron.Start()
 
 	NewGameHint <- game
@@ -89,6 +88,8 @@ func (g *Game) Extend(timeSecond int) {
 		if g.TimeLeft >= consts.FiveMinutes {
 			g.TimeLeft = consts.FiveMinutes
 		}
+	} else {
+		return
 	}
 	JoinTimeLeftHint <- g
 }
@@ -109,7 +110,14 @@ func (g *Game) Join(user *User) {
 		g.Users = append(g.Users, user)
 	}
 	user.TgGroupJoinGame = g.TgGroup
+	if g.TimeLeft < consts.OneMinute {
+		g.TimeLeft += 10
+		if g.TimeLeft > consts.OneMinute {
+			g.TimeLeft = consts.OneMinute
+		}
+	}
 	UserJoinHint <- user
+	PlayersHint <- g
 }
 
 //Flee is remove user to game or kill player in game
@@ -122,6 +130,7 @@ func (g *Game) Flee(user *User) {
 	case GameNotStart:
 		g.fleeUser(user)
 		GameFleeHint <- user
+		PlayersHint <- g
 	case GameStart:
 		GameNoFleeHint <- user
 	}

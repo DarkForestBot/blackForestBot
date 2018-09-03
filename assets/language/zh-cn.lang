@@ -4,12 +4,13 @@ trans:help=*暗黑森林* 游戏帮助\n\n命令：\n/startgame 开始游戏【�
 trans:about=*暗黑森林* 关于\n\n作者：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
 trans:startgame=[{{.Name}}](tg://user?id={{.TgUserID}})带领大家进入了暗黑森林，开启了一场混乱的杀人派对，只有一个人可以活着出来！
 trans:join=加入
+trans:registerneeded=你需要先和我私聊，使用`/start`命令注册
 trans:grouponly=这个命令*只能*在群组里使用.
 trans:chatonly=这个命令*只能*在私聊中使用.
 trans:badpassword=密码错误
 trans:adminon=管理模式 *ON*.\n使用不带任何参数的 \admin 指令关闭管理模式
 trans:adminoff=管理模式 *OFF*.
-trans:players=#Players: {{len .Players}}\n{{range .Players}}\n[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
+trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
 trans:gamecancelled=人数不足6人，游戏取消
 trans:gamestart=游戏开始！
 trans:jointime=游戏还有 {{.}} 可以加入，要快！

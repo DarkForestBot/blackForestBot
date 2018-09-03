@@ -17,7 +17,7 @@ for root, dir, file in os.walk(join(BUILD_PATH, 'assets', 'language')):
         LANGNAME = ''
 
         for i in open(join(root, lang), 'r'):
-            i = i.replace('\r', '').replace('\n', '')
+            i = i.replace('\r', '').replace('\n', '').replace('\x08', '')
             if i.strip() == "":
                 continue
             if i[0] == "#":  # comment

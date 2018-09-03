@@ -17,6 +17,7 @@ var (
 	AdminBadPasswordEvent    chan *tgApi.Message
 	SetLangMsgEvent          chan *tgApi.Message
 	NextGameEvent            chan *tgApi.Message
+	RegisterNeededEvent      chan *tgApi.Message
 	LanguageChangedEvent     chan *tgApi.CallbackQuery
 	DeleteMessageEvent       chan tgApi.DeleteMessageConfig
 	RemoveMessageMarkUpEvent chan tgApi.EditMessageReplyMarkupConfig
@@ -37,6 +38,7 @@ func init() {
 	AdminBadPasswordEvent = make(chan *tgApi.Message, 1024)
 	SetLangMsgEvent = make(chan *tgApi.Message, 1024)
 	NextGameEvent = make(chan *tgApi.Message, 1024)
+	RegisterNeededEvent = make(chan *tgApi.Message, 1024)
 	LanguageChangedEvent = make(chan *tgApi.CallbackQuery, 1024)
 	DeleteMessageEvent = make(chan tgApi.DeleteMessageConfig, 1024)
 	RemoveMessageMarkUpEvent = make(chan tgApi.EditMessageReplyMarkupConfig, 1024)
