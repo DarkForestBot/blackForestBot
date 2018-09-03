@@ -9,8 +9,6 @@ import (
 
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 
-	"git.wetofu.top/tonychee7000/blackForestBot/consts"
-	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -26,12 +24,12 @@ func releaseThreadPool() {
 }
 
 func getLang(ID int64) string {
-	var str string
-	if err := database.Redis.Get(fmt.Sprintf(consts.LangSetFormatString, ID)).Scan(&str); err != nil {
-		log.Printf("WARNING: error %v", err)
-		return "English"
+	str, ok := lang.UserLang[ID]
+	if ok {
+		return str
 	}
-	return str
+	log.Printf("No language set found by `%d`, use default `English`", ID)
+	return "English"
 }
 
 func joinButton(ID int64, bot *Bot) tgApi.InlineKeyboardMarkup {
