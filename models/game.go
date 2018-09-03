@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"git.wetofu.top/tonychee7000/blackForestBot/config"
 	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"github.com/robfig/cron"
 )
@@ -22,7 +23,7 @@ const (
 	GameOver       GameStatus = 2
 	GameIsDay                 = true
 	GameIsNight               = !GameIsDay
-	GameMinPlayers            = 3
+	GameMinPlayers            = 6
 )
 
 type msgSent struct {
@@ -142,7 +143,11 @@ func (g *Game) Start() error {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
-	if len(g.Users) < GameMinPlayers {
+	debug := 1
+	if config.DefaultConfig.Debug {
+		debug++
+	}
+	if len(g.Users) < GameMinPlayers/debug {
 		return errors.New("Too less users")
 	}
 	g.makePlayer()
@@ -276,12 +281,13 @@ func (g *Game) gameTimeCheck() {
 		g.IsDay = GameIsDay
 		g.TimeLeft = consts.TwoMinutes
 		g.Round++
-		g.winloseCheck()
-		GameChangeToDayHint <- g
+		if !g.winloseCheck() {
+			GameChangeToDayHint <- g
+		}
 	}
 }
 
-func (g *Game) winloseCheck() {
+func (g *Game) winloseCheck() bool {
 	var pl = make([]*Player, 0)
 	for _, player := range g.Players {
 		if player.Live {
@@ -292,13 +298,16 @@ func (g *Game) winloseCheck() {
 	if len(pl) == 0 { // All Dead
 		GameLoseHint <- g
 		g.Status = GameOver
+		return true
 	} else if len(pl) == 1 {
 		pl[0].User.GamesWon++
 		pl[0].User.Update()
 		g.Winner = pl[0]
 		WinGameHint <- g
 		g.Status = GameOver
+		return true
 	}
+	return false
 }
 
 // core logic!
