@@ -112,7 +112,7 @@ func (u *User) achivementCheck(achivementLevel *int, achivement, count, base, ti
 	}
 	if cond && (*achivementLevel) < maxAchivementLevel {
 		u.AchivementCode = (*achivementLevel) + 10*achivement
-		// <- u
+		AchivementRewardedHint <- u
 		(*achivementLevel)++
 		u.AchiveRewardedCount++
 	}
