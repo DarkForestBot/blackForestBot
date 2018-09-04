@@ -374,7 +374,7 @@ func (g *Game) settleStageTag() {
 
 func (g *Game) settleStageCheckBetry() {
 	for _, player := range g.Players {
-		if player.UnionValidation() { // Here must some mistakes.
+		if !player.UnionValidation() { // Here must some mistakes.
 			player.Ununion()
 			continue
 		}

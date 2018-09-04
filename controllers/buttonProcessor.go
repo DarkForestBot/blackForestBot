@@ -215,7 +215,7 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 
 	// if target has union, you cannot union.
 	if targetPlayer.UnionValidation() {
-		models.UnionRejectHint <- []*models.Player{srcPlayer, targetPlayer}
+		models.UnionRejectHint <- []*models.Player{targetPlayer, srcPlayer}
 	} else {
 		models.UnionReqHint <- []*models.Player{srcPlayer, targetPlayer}
 	}
