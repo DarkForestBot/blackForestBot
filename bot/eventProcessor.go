@@ -801,10 +801,18 @@ func (b *Bot) onNoGameEvent(msg *tgApi.Message) {
 
 func (b *Bot) onOperationApprovedEvent(act *tgApi.CallbackQuery) {
 	langSet := getLang(int64(act.From.ID))
-	_, err := b.MarkdownMessage(
+	if _, err := b.MarkdownMessage(
 		int64(act.From.ID), langSet, "operapproved", nil,
-	)
-	if err != nil {
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onPlayerSurvivedAtNightHint(player *models.Player) {
+	langSet := player.User.Language
+	if _, err := b.MarkdownMessage(
+		player.User.TgUserID, langSet, "survive", nil,
+	); err != nil {
 		log.Println("ERROR:", err)
 	}
 }

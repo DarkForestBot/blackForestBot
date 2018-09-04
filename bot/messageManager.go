@@ -62,6 +62,8 @@ func (b *Bot) messageManager() {
 			go b.onPlayerBeastHint(player)
 		case game := <-models.GetPlayersHint:
 			go b.onGetPlayersHint(game)
+		case player := <-models.PlayerSurvivedAtNightHint:
+			go b.onPlayerSurvivedAtNightHint(player)
 		case user := <-models.UserStatsHint:
 			go b.onUserStatsHint(user)
 		case msg := <-controllers.OnJoinAChatEvent:

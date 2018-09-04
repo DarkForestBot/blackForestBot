@@ -2,32 +2,33 @@ package models
 
 //List of channels
 var (
-	NewGameHint            chan *Game
-	UserJoinHint           chan *User
-	GameFleeHint           chan *User
-	GameNoFleeHint         chan *User
-	NotEnoughPlayersHint   chan *Game
-	JoinTimeLeftHint       chan *Game
-	TryStartGameHint       chan *Game
-	StartGameFailed        chan *Game
-	StartGameSuccess       chan *Game
-	GameTimeOutOperation   chan *Game
-	AbortPlayerHint        chan *Player
-	GameChangeToNightHint  chan *Game
-	GameChangeToDayHint    chan *Game
-	GameLoseHint           chan *Game
-	WinGameHint            chan *Game
-	PlayersHint            chan *Game // Change player list
-	PlayerKillHint         chan *Player
-	PlayerBeastHint        chan *Player
-	GetPlayersHint         chan *Game
-	UserStatsHint          chan *User
-	ShootXHint             chan *Player
-	ShootYHint             chan *Player
-	UnionReqHint           chan []*Player //Player[0]: Src, Player[1]: Dst
-	UnionAcceptHint        chan []*Player
-	UnionRejectHint        chan []*Player
-	AchivementRewardedHint chan *User
+	NewGameHint               chan *Game
+	UserJoinHint              chan *User
+	GameFleeHint              chan *User
+	GameNoFleeHint            chan *User
+	NotEnoughPlayersHint      chan *Game
+	JoinTimeLeftHint          chan *Game
+	TryStartGameHint          chan *Game
+	StartGameFailed           chan *Game
+	StartGameSuccess          chan *Game
+	GameTimeOutOperation      chan *Game
+	AbortPlayerHint           chan *Player
+	GameChangeToNightHint     chan *Game
+	GameChangeToDayHint       chan *Game
+	GameLoseHint              chan *Game
+	WinGameHint               chan *Game
+	PlayersHint               chan *Game // Change player list
+	PlayerKillHint            chan *Player
+	PlayerBeastHint           chan *Player
+	GetPlayersHint            chan *Game
+	UserStatsHint             chan *User
+	ShootXHint                chan *Player
+	ShootYHint                chan *Player
+	UnionReqHint              chan []*Player //Player[0]: Src, Player[1]: Dst
+	UnionAcceptHint           chan []*Player
+	UnionRejectHint           chan []*Player
+	AchivementRewardedHint    chan *User
+	PlayerSurvivedAtNightHint chan *Player
 )
 
 func init() {
@@ -57,4 +58,5 @@ func init() {
 	UnionAcceptHint = make(chan []*Player, 1024)
 	UnionRejectHint = make(chan []*Player, 1024)
 	AchivementRewardedHint = make(chan *User, 1024)
+	PlayerSurvivedAtNightHint = make(chan *Player, 1024)
 }

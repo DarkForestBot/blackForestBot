@@ -6,7 +6,7 @@
 # "\n" is used as new line. "{{.Blah}}" will be replaced by program, please keep it as is.
 meta:language=English
 trans:test=Test
-trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from gamep \\[Group]\n/extend \\[time] Extend time of joining a game, default extends 30s. \\[Group]\n/stats \\[someone] Show stats for someone, default self \\[Group/PM]\n\nRules:\n1. Every player will get a position `(x, y)` (`x` and `y` are double of players). Every player can shoot at a position every night. Player will be killed when someone shoot at his position.\n2. Every shoot would expose one of axes of his position.\n3. Player would convert to a BEAST when all axes of his position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will convert to BEAST.\n5. Two players can unite each other, only of they know.\n6. Players who join a union would not expose his position.\n7. Player can betray his union at night and kill another one, no position is needed.\n8. Player can set a trap at night, player who betrayed you will be killed\n9. Only one player live, or all DEAD
+trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from gamep \\[Group]\n/extend \\[time] Extend time of joining a game, default extends 30s. \\[Group]\n/stats \\[someone] Show stats for someone, default self \\[Group/PM]\n\nRules:\n1. Every player will get a position `(x, y)` (`x` and `y` are double of players). Every player can shoot at a position every night. Player will be killed when someone shoot at its position.\n2. Every shoot would expose one of axes of his position.\n3. Player would convert to a BEAST when all axes of his position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will have 1/3 chance to survive, dead of become to BEAST. The BEAST will have half chance to death.\n5. Two players can unite each other, only of they know.\n6. Players who join a union would not expose his position.\n7. Player can betray its union at night and kill another one, no position is needed. Players who teamed up each other betrayed each other would be BEAST.\n8. Player can set a trap at night, player who betrayed you will be killed. However, you would be BEAST if no one betrayed you.\n9. Only one player live, or all DEAD
 trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
 trans:startgame=[{{.Name}}](tg://user?id={{.TgUserID}}) leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
 trans:join=Join
@@ -38,7 +38,7 @@ trans:langchanged=OK! I will show message in English.
 trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{if ne .GamesJoined 0}}{{.GamesWon * 100 / .GamesJoined }}%{{else}}-{{end}}\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
 trans:accept=✅ Accept
 trans:reject=❎ Reject
-trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna be union with you. Do you want to accept with it?
+trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna team up with you. Do you want to accept with it?
 trans:unionhint=Now you can choose a player to team up with, who do you want?
 trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) has accepted your request.
 trans:unionfailed=Union failed
@@ -52,20 +52,21 @@ trans:onnight=New is night and here comes the most brute time. Your choice means
 trans:betray=Betray
 trans:trap=Trap
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
-trans:lose=#Lose Oops! NO ONE live
+trans:lose=#Lose Oops! ALL dead.
 trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
 trans:timeoutnight=Time out! Your fate choose your life!
 trans:timeoutday=It's sunset now. stop finding your pal.
 trans:joinachat=Hello everyone, I am a bot which play a game called `DarkForest` like PUBG.\n/help Show help.
-trans:receivegif=Got image`{{.}}`
-trans:onstart=Hi, you have registered successfully.
-trans:beast=You was knockout by lighting...\nWhen you wake up again, a *BEAST* you are!
-trans:killed0=A bullet hit you when you in a hurry in this suck place...\n*Now You DEAD!*
-trans:killed1=That man who you beleved in is shooting at you...\n*Now You DEAD!*
-trans:killed2=You was trapped when you are shooting at your friend...\n*Now You DEAD!*
-trans:killed3=You was hit by a meteor...\n*Now You DEAD!*
-trans:killed4=A beast rushed to you when you a shooting at it...\n*Now You DEAD!*
-trans:killed5=You killed it, but you are suffering heavy wound...\n*Now You DEAD!*
+trans:receivegif=Got image `{{.}}`
+trans:onstart=Hi, you have registered already.
+trans:beast=You were knockout by lightning...\nWhen you wake up again, a *BEAST* you are!
+trans:survive=Thanks God! Nothing is the best thing!
+trans:killed0=A bullet hit you when you were in a panic in this suck place...\n*Now You DEAD!*
+trans:killed1=That man who you beleved in was shooting at you...\n*Now You DEAD!*
+trans:killed2=You were trapped when you were shooting at your friend...\n*Now You DEAD!*
+trans:killed3=You were hit by a meteor...\n*Now You DEAD!*
+trans:killed4=A beast rushed to you when you were shooting at it...\n*Now You DEAD!*
+trans:killed5=You killed that beast, but you were suffering heavy wound...\n*Now You DEAD!*
 trans:abort=Abort
 trans:achivementrewarded=Congratulations, you have rewarded achivement *{{.}}*!
 

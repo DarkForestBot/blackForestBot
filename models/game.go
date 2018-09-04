@@ -362,10 +362,14 @@ func (g *Game) settleStageTag() {
 					opeartion.Player.StatusChange(PlayerStatusBeast)
 				} else if fate == 1 {
 					opeartion.Player.Kill(Flee)
+				} else {
+					PlayerSurvivedAtNightHint <- opeartion.Player
 				}
 			} else {
 				if rand.Intn(2) == 0 {
 					opeartion.Player.Kill(Flee)
+				} else {
+					PlayerSurvivedAtNightHint <- opeartion.Player
 				}
 			}
 		}
