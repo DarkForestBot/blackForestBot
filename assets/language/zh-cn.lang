@@ -8,7 +8,7 @@ trans:registerneeded=你需要先和我私聊，使用`/start`命令注册
 trans:grouponly=这个命令*只能*在群组里使用.
 trans:chatonly=这个命令*只能*在私聊中使用.
 trans:badpassword=密码错误
-trans:adminon=管理模式 *ON*.\n使用不带任何参数的 \admin 指令关闭管理模式
+trans:adminon=管理模式 *ON*.\n使用不带任何参数的 `/admin` 指令关闭管理模式
 trans:adminoff=管理模式 *OFF*.
 trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
 trans:gamecancelled=人数不足6人，游戏取消

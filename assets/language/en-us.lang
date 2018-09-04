@@ -8,7 +8,7 @@ trans:registerneeded=You need to start a private chat to me, and `/start` it.
 trans:grouponly=This command is used in a group *ONLY*.
 trans:chatonly=This command is used in a private chat *ONLY*
 trans:badpassword=Invalid password.
-trans:adminon=Admin mode *ON*.\nTo leave admin mode, use \admin without any argument.
+trans:adminon=Admin mode *ON*.\nTo leave admin mode, use /admin without any argument.
 trans:adminoff=Admin mode *OFF*.
 trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
 trans:gamecancelled=No enough players joined, game cancelled.
