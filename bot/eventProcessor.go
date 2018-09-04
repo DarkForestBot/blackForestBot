@@ -101,6 +101,7 @@ func (b *Bot) onUserJoinHint(user *models.User) {
 func (b *Bot) onGameFleeHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	log.Println(user)
 	langSet := user.TgGroupJoinGame.Lang
 	if _, err := b.MarkdownMessage(
 		user.TgGroupJoinGame.TgGroupID, langSet, "flee", user,

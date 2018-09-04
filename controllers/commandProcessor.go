@@ -256,12 +256,13 @@ func onFlee(msg *tgApi.Message, args ...string) error {
 		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
-	user, err := models.GetUser(int64(msg.From.ID))
-	if err != nil {
-		return err
-	}
+
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
+		user := game.GetUser(int64(msg.From.ID))
+		if user != nil {
+			return errors.New("No such user found")
+		}
 		game.Flee(user)
 	} else {
 		NoGameEvent <- msg

@@ -186,6 +186,16 @@ func (g *Game) GetPlayer(tgUserID int64) *Player {
 	return nil
 }
 
+//GetUser is
+func (g *Game) GetUser(tgUserID int64) *User {
+	for _, user := range g.Users {
+		if user.TgUserID == tgUserID {
+			return user
+		}
+	}
+	return nil
+}
+
 //GetPosition is
 func (g *Game) GetPosition(x, y int) *Position {
 	for _, pos := range g.Positions {
@@ -485,7 +495,6 @@ func (g *Game) findPlayer(user *User) *Player {
 }
 
 func (g *Game) fleeUser(user *User) {
-
 	for i, guser := range g.Users {
 		if guser.ID == user.ID {
 			if i == len(g.Users)-1 { // if the last one
