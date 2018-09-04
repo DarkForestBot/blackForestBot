@@ -485,9 +485,14 @@ func (g *Game) findPlayer(user *User) *Player {
 }
 
 func (g *Game) fleeUser(user *User) {
+
 	for i, guser := range g.Users {
 		if guser.ID == user.ID {
-			g.Users = append(g.Users[:i], g.Users[i+1:]...)
+			if i == len(g.Users)-1 { // if the last one
+				g.Users = g.Users[:i] // delete the last one
+			} else {
+				g.Users = append(g.Users[:i], g.Users[i+1:]...)
+			}
 		}
 	}
 }

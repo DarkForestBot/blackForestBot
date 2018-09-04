@@ -406,6 +406,7 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 }
 
 func (b *Bot) onUnionAcceptHint(players []*models.Player) {
+	defer func() { recover() }()
 	threadLimitPool <- 1
 	defer releaseThreadPool()
 	// 0: button clicker, 1: reply to
@@ -434,6 +435,7 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 }
 
 func (b *Bot) onUnionRejectHint(players []*models.Player) {
+	defer func() { recover() }()
 	threadLimitPool <- 1
 	defer releaseThreadPool()
 	// 0: button clicker, 1: reply to
@@ -442,13 +444,21 @@ func (b *Bot) onUnionRejectHint(players []*models.Player) {
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
+
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
 	for i, msg := range players[0].UnionReqRecv {
 		if msg.From == players[1] {
 			controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 				msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 			)
 			//Remove this msg from UnionReqRecv
-			players[0].UnionReqRecv = append(players[0].UnionReqRecv[:i], players[0].UnionReqRecv[i+1:]...)
+			if i == len(players[0].UnionReqRecv)-1 { // if the last one
+				players[0].UnionReqRecv = players[0].UnionReqRecv[:i] // remove last one
+			} else {
+				players[0].UnionReqRecv = append(players[0].UnionReqRecv[:i], players[0].UnionReqRecv[i+1:]...)
+			}
 		}
 	}
 }

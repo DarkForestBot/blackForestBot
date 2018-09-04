@@ -71,6 +71,10 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 }
 
 func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
+	var lock sync.RWMutex
+	lock.Lock()
+	defer lock.Unlock()
+
 	if arg == "" {
 		return errors.New("Bad game id")
 	}
@@ -86,7 +90,11 @@ func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
 	}
 	for i, k := range gameQueue {
 		if k == int64(act.From.ID) {
-			gameQueue = append(gameQueue[:i], gameQueue[i+1:]...)
+			if i == len(gameQueue)-1 {
+				gameQueue = gameQueue[:i]
+			} else {
+				gameQueue = append(gameQueue[:i], gameQueue[i+1:]...)
+			}
 		}
 	}
 	if err := database.Redis.Set(
