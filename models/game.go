@@ -159,7 +159,7 @@ func (g *Game) Start() error {
 	GameChangeToDayHint <- g
 	for _, p := range g.Players {
 		if config.DefaultConfig.Debug {
-			log.Println("DEBUG:" p)
+			log.Println("DEBUG:", p)
 		}
 	}
 	return nil
