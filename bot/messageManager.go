@@ -102,6 +102,8 @@ func (b *Bot) messageManager() {
 			go b.onRemoveMessageMarkUpEvent(edit)
 		case edit := <-controllers.EditMessageTextEvent:
 			go b.onEditMessageTextEvent(edit)
+		case act := <-controllers.OperationApprovedEvent:
+			go b.onOperationApprovedEvent(act)
 		}
 	}
 }

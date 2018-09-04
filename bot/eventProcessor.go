@@ -101,7 +101,6 @@ func (b *Bot) onUserJoinHint(user *models.User) {
 func (b *Bot) onGameFleeHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	log.Println(user)
 	langSet := user.TgGroupJoinGame.Lang
 	if _, err := b.MarkdownMessage(
 		user.TgGroupJoinGame.TgGroupID, langSet, "flee", user,
@@ -377,6 +376,7 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 			),
 		),
 	)
+
 	// Step I: remove union request button.
 	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		players[0].User.TgUserID, players[0].UnionReq,
@@ -795,6 +795,16 @@ func (b *Bot) onNoGameEvent(msg *tgApi.Message) {
 	if _, err := b.MarkdownReply(
 		msg.Chat.ID, langSet, "nogame",
 		msg.MessageID, nil); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onOperationApprovedEvent(act *tgApi.CallbackQuery) {
+	langSet := getLang(int64(act.From.ID))
+	_, err := b.MarkdownMessage(
+		int64(act.From.ID), langSet, "operapproved", nil,
+	)
+	if err != nil {
 		log.Println("ERROR:", err)
 	}
 }

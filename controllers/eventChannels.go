@@ -23,6 +23,7 @@ var (
 	RemoveMessageMarkUpEvent chan tgApi.EditMessageReplyMarkupConfig
 	EditMessageTextEvent     chan tgApi.EditMessageTextConfig
 	NoGameEvent              chan *tgApi.Message
+	OperationApprovedEvent   chan *tgApi.CallbackQuery
 )
 
 func init() {
@@ -45,4 +46,5 @@ func init() {
 	RemoveMessageMarkUpEvent = make(chan tgApi.EditMessageReplyMarkupConfig, 1024)
 	EditMessageTextEvent = make(chan tgApi.EditMessageTextConfig, 1024)
 	NoGameEvent = make(chan *tgApi.Message, 1024)
+	OperationApprovedEvent = make(chan *tgApi.CallbackQuery, 1024)
 }

@@ -39,6 +39,7 @@ trans:unionfailed=Union failed
 trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
 trans:operhint1=Now, decide your action!\nNumeric is one axis of a position, you need 2 times for shooting at the position\n(Abort: abort all operations this night, all will be decide by fate.)
 trans:operhint2=OK, now you can choose another axis of a position.
+trans:operapproved=Your operation is approved.
 trans:skip=Skip
 trans:onday=Now is day and every player can choose another one for a union. Go ahead!\nYou have 120 seconds to take action.
 trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!\nYou have 60 seconds to take action.

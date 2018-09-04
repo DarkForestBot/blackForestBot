@@ -172,22 +172,14 @@ func btnShootTwo(arg string, act *tgApi.CallbackQuery) error {
 	game.AttachOperation(player.Shoot(false, pos))
 
 	models.ShootYHint <- player
+	OperationApprovedEvent <- act
 	return nil
 }
 
 func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 	args := strings.SplitN(arg, ",", 2)
 	ID, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil {
-		return err
-	}
 
-	// unionreq for none, means skip
-	if args[0] == "" {
-		return nil
-	}
-
-	userID, err := strconv.ParseInt(args[0], 10, 64)
 	if err != nil {
 		return err
 	}
@@ -202,12 +194,31 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 		return errors.New("No such source player")
 	}
 
+	// unionreq for none, means skip
+	if args[0] == "" {
+		RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+			srcPlayer.User.TgUserID, srcPlayer.UnionReq,
+			tgApi.InlineKeyboardMarkup{},
+		)
+		return nil
+	}
+
+	userID, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+
 	targetPlayer := game.GetPlayer(userID)
 	if targetPlayer == nil {
 		return errors.New("No such target player")
 	}
 
-	models.UnionReqHint <- []*models.Player{srcPlayer, targetPlayer}
+	// if target has union, you cannot union.
+	if targetPlayer.UnionValidation() {
+		models.UnionRejectHint <- []*models.Player{srcPlayer, targetPlayer}
+	} else {
+		models.UnionReqHint <- []*models.Player{srcPlayer, targetPlayer}
+	}
 
 	return nil
 }
@@ -300,6 +311,7 @@ func btnBetray(arg string, act *tgApi.CallbackQuery) error {
 	game.AttachOperation(player.Shoot(true, nil))
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
+	OperationApprovedEvent <- act
 	return nil
 }
 
@@ -317,6 +329,7 @@ func btnTrap(arg string, act *tgApi.CallbackQuery) error {
 	player.TrapSet = true
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
+	OperationApprovedEvent <- act
 	return nil
 }
 
@@ -334,5 +347,6 @@ func btnAbort(arg string, act *tgApi.CallbackQuery) error {
 	game.AttachOperation(player.Abort())
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
+	OperationApprovedEvent <- act
 	return nil
 }

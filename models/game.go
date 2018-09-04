@@ -110,16 +110,17 @@ func (g *Game) Join(user *User) {
 			}
 		}
 		g.Users = append(g.Users, user)
-	}
-	user.TgGroupJoinGame = g.TgGroup
-	if g.TimeLeft < consts.OneMinute {
-		g.TimeLeft += 10
-		if g.TimeLeft > consts.OneMinute {
-			g.TimeLeft = consts.OneMinute
+		user.TgGroupJoinGame = g.TgGroup
+
+		if g.TimeLeft < consts.OneMinute {
+			g.TimeLeft += 10
+			if g.TimeLeft > consts.OneMinute {
+				g.TimeLeft = consts.OneMinute
+			}
 		}
+		UserJoinHint <- user
+		PlayersHint <- g
 	}
-	UserJoinHint <- user
-	PlayersHint <- g
 }
 
 //Flee is remove user to game or kill player in game
@@ -156,6 +157,11 @@ func (g *Game) Start() error {
 	g.IsDay = GameIsDay
 	g.Round = 1 // First day
 	GameChangeToDayHint <- g
+	for _, p := range g.Players {
+		if config.DefaultConfig.Debug {
+			log.Println("DEBUG:" p)
+		}
+	}
 	return nil
 }
 
@@ -515,8 +521,10 @@ func (g *Game) makeField() ([]int, []int) {
 		yi := i % (2 * lenuser)
 		pos := NewPosition(xi, yi)
 		g.Positions = append(g.Positions, pos)
-		x = append(x, xi)
-		y = append(y, xi)
+	}
+	for i := 0; i < 2*lenuser; i++ {
+		x = append(x, i)
+		y = append(y, i)
 	}
 	return x, y
 }

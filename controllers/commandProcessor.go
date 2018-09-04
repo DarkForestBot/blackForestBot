@@ -147,7 +147,9 @@ func onStart(msg *tgApi.Message, args ...string) error {
 		}
 		game, ok := gameList[id]
 		if ok && game != nil && game.Status == models.GameNotStart {
-			game.Join(user)
+			if game.GetUser(user.TgUserID) == nil {
+				game.Join(user)
+			}
 		}
 	} else {
 		OnStartEvent <- msg
@@ -171,10 +173,10 @@ func onStartGame(msg *tgApi.Message, args ...string) error {
 		if ok && game != nil && game.TgGroup.TgGroupID == msg.Chat.ID &&
 			game.Status != models.GameOver {
 			GroupHasAGameEvent <- msg
+		} else {
+			game = models.NewGame(group, user)
+			gameList[msg.Chat.ID] = game
 		}
-
-		game = models.NewGame(group, user)
-		gameList[msg.Chat.ID] = game
 	} else {
 		GroupOnlyEvent <- msg
 	}
@@ -260,7 +262,7 @@ func onFlee(msg *tgApi.Message, args ...string) error {
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
 		user := game.GetUser(int64(msg.From.ID))
-		if user != nil {
+		if user == nil {
 			return errors.New("No such user found")
 		}
 		game.Flee(user)
