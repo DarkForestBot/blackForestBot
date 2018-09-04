@@ -2,7 +2,7 @@
 # Line start with "#" is comment
 # Every line has format as "trans:key=string"
 # "key" is uesd for looking for the "string" when running. DO NOT MODIFY!
-# "string" are the real words that will send to telegram, with format as telegram markdown.
+# "string" are the real words that will be sent to telegram, with format as telegram markdown.
 # "\n" is used as new line. "{{.Blah}}" will be replaced by program, please keep it as is.
 meta:language=English
 trans:test=Test
