@@ -196,6 +196,10 @@ func (p *Player) UnionCorrection() {
 }
 
 func (p *Player) String() string {
-	return fmt.Sprintf("Player(User=%s Live=%v Position=%s Status=%d Unioned=%v)",
-		p.User, p.Live, p.Position, p.Status, p.Unioned)
+	if p.Unioned != nil {
+		return fmt.Sprintf("Player(User=%s Live=%v Position=%s Status=%d Unioned=%s)",
+			p.User, p.Live, p.Position, p.Status, p.Unioned.User)
+	}
+	return fmt.Sprintf("Player(User=%s Live=%v Position=%s Status=%d Unioned=nil)",
+		p.User, p.Live, p.Position, p.Status)
 }
