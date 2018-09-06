@@ -39,6 +39,7 @@ func init() {
 	CommandList["stats"] = onStat
 	CommandList["forcestart"] = onForceStart
 	CommandList["nextgame"] = onNextGame
+	CommandList["newgame"] = onStartGame
 	isAdminMode = false
 }
 
