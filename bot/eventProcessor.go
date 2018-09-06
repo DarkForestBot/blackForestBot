@@ -191,6 +191,13 @@ func (b *Bot) onStartGameSuccess(game *models.Game) {
 			log.Println("ERROR:", err)
 		}
 	}
+	// Clear nextgame queue
+	if err := database.Redis.Set(
+		fmt.Sprintf(consts.GameQueueMsgFormatString, game.TgGroup.TgGroupID),
+		[]int{}, -1,
+	).Err(); err != nil {
+		log.Println("ERROR:", err)
+	}
 }
 
 func (b *Bot) onGameTimeOutOperation(game *models.Game) {

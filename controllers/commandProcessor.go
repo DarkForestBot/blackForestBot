@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"git.wetofu.top/tonychee7000/blackForestBot/config"
-	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
@@ -303,26 +302,8 @@ func onNextGame(msg *tgApi.Message, arg ...string) error {
 		GroupOnlyEvent <- msg
 		return errors.New("Group only")
 	}
-	user, err := models.GetUser(int64(msg.From.ID))
+	_, err := models.GetUser(int64(msg.From.ID))
 	if err != nil {
-		return err
-	}
-	var gameQueue []int64
-	if err := database.Redis.Get(
-		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
-	).Scan(&gameQueue); err != nil {
-		return err
-	}
-	for _, id := range gameQueue {
-		if id == user.TgUserID {
-			return nil
-		}
-	}
-	gameQueue = append(gameQueue, user.TgUserID)
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),
-		gameQueue, -1,
-	).Err(); err != nil {
 		return err
 	}
 
