@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -10,8 +9,6 @@ import (
 
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 
-	"git.wetofu.top/tonychee7000/blackForestBot/consts"
-	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -82,31 +79,19 @@ func btnCancelGame(arg string, act *tgApi.CallbackQuery) error {
 	if err != nil {
 		return err
 	}
-	var gameQueue []int64
-	if err := database.Redis.Get(
-		fmt.Sprintf(consts.GameQueueFormatString, ID),
-	).Scan(&gameQueue); err != nil {
+
+	if err := DelGameQueue(ID,
+		models.NewQueueElement(act.Message.Chat.ID, act.Message.MessageID),
+	); err != nil {
 		return err
 	}
-	for i, k := range gameQueue {
-		if k == int64(act.From.ID) {
-			if i == len(gameQueue)-1 {
-				gameQueue = gameQueue[:i]
-			} else {
-				gameQueue = append(gameQueue[:i], gameQueue[i+1:]...)
-			}
+
+	defer func() {
+		DeleteMessageEvent <- tgApi.DeleteMessageConfig{
+			ChatID:    act.Message.Chat.ID,
+			MessageID: act.Message.MessageID,
 		}
-	}
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.GameQueueFormatString, ID),
-		gameQueue, -1,
-	).Err(); err != nil {
-		return err
-	}
-	DeleteMessageEvent <- tgApi.DeleteMessageConfig{
-		ChatID:    act.Message.Chat.ID,
-		MessageID: act.Message.MessageID,
-	}
+	}()
 	return nil
 }
 

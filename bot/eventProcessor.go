@@ -7,9 +7,7 @@ import (
 
 	"git.wetofu.top/tonychee7000/blackForestBot/basis"
 	"git.wetofu.top/tonychee7000/blackForestBot/config"
-	"git.wetofu.top/tonychee7000/blackForestBot/consts"
 	"git.wetofu.top/tonychee7000/blackForestBot/controllers"
-	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	"git.wetofu.top/tonychee7000/blackForestBot/lang"
 	"git.wetofu.top/tonychee7000/blackForestBot/models"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -63,16 +61,14 @@ func (b *Bot) onNewGameHint(game *models.Game) {
 	game.MsgSent.PlayerList = msg.MessageID
 
 	//Setp III: pm in gamequeue
-	var gameQueue []int64
-	if err := database.Redis.Get(
-		fmt.Sprintf(consts.GameQueueFormatString, game.TgGroup.TgGroupID),
-	).Scan(&gameQueue); err != nil {
+	gameQueue, err := controllers.GetGameQueue(game.TgGroup.TgGroupID)
+	if err != nil {
 		log.Println("ERROR:", err)
 		return
 	}
-	for _, id := range gameQueue {
-		langSet := getLang(id)
-		_, err = b.MarkdownMessage(id, langSet, "newgame", game.TgGroup.Name)
+	for _, e := range gameQueue {
+		langSet := getLang(e.UserID)
+		_, err = b.MarkdownMessage(e.UserID, langSet, "newgame", game.TgGroup.Name)
 		if err != nil {
 			log.Println("ERROR:", err)
 		}
@@ -192,10 +188,7 @@ func (b *Bot) onStartGameSuccess(game *models.Game) {
 		}
 	}
 	// Clear nextgame queue
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.GameQueueMsgFormatString, game.TgGroup.TgGroupID),
-		[]int{}, -1,
-	).Err(); err != nil {
+	if err := controllers.ClearGameQueue(game.TgGroup.TgGroupID); err != nil {
 		log.Println("ERROR:", err)
 	}
 }
@@ -734,17 +727,9 @@ func (b *Bot) onNextGameEvent(msg *tgApi.Message) {
 	if err != nil {
 		log.Println("ERROR:", err)
 	}
-	var gameQueueMsg []int
-	if err := database.Redis.Get(
-		fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
-	).Scan(&gameQueueMsg); err != nil {
-		log.Println("ERROR:", err)
-	}
-	gameQueueMsg = append(gameQueueMsg, nmsg.MessageID)
-	if err := database.Redis.Set(
-		fmt.Sprintf(consts.GameQueueMsgFormatString, msg.Chat.ID),
-		gameQueueMsg, -1,
-	).Err(); err != nil {
+	if err := controllers.AddGameQueue(
+		msg.Chat.ID, models.NewQueueElement(
+			int64(msg.From.ID), nmsg.MessageID)); err != nil {
 		log.Println("ERROR:", err)
 	}
 }
