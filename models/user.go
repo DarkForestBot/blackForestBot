@@ -50,7 +50,7 @@ type User struct {
 	SniperKillCountAchive int `gorm:"default:0;not null"`
 	KilledByTrapCount     int `gorm:"default:0;not null"`
 	KilledByTrapAchive    int `gorm:"default:0;not null"`
-	TrapCount             int `gorm:"defalut:0;not null"`
+	TrapCount             int `gorm:"default:0;not null"`
 	TrapAchive            int `gorm:"default:0;not null"`
 	UnionCount            int `gorm:"default:0;not null"`
 	UnionAchive           int `gorm:"default:0;not null"`
