@@ -277,7 +277,7 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 	lock.Lock()
 	defer lock.Unlock()
 	for _, player := range game.Players {
-		if player.Live {
+		if player.Live && !player.UnionValidation() {
 			langSet = player.User.Language
 			msg, err := b.MarkdownMessage(
 				player.User.TgUserID, langSet, "unionhint", nil,
