@@ -221,6 +221,12 @@ func (g *Game) AttachOperation(op *Operation) {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
+	// One player only operate once a round.
+	for _, operation := range g.Operations {
+		if op.Player == operation.Player {
+			return
+		}
+	}
 	g.Operations = append(g.Operations, op)
 }
 
