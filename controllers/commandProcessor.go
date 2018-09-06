@@ -313,6 +313,11 @@ func onNextGame(msg *tgApi.Message, arg ...string) error {
 	).Scan(&gameQueue); err != nil {
 		return err
 	}
+	for _, id := range gameQueue {
+		if id == user.TgUserID {
+			return nil
+		}
+	}
 	gameQueue = append(gameQueue, user.TgUserID)
 	if err := database.Redis.Set(
 		fmt.Sprintf(consts.GameQueueFormatString, msg.Chat.ID),

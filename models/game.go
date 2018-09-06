@@ -409,7 +409,6 @@ func (g *Game) settleStageCheckBetry() {
 					player.Target.Kill(Betrayed)
 					player.Target = nil
 				}
-				player.Ununion() // Union broken.
 			}
 		}
 	}
@@ -461,7 +460,7 @@ func (g *Game) settleStageCheckUnion() {
 	for _, player := range g.Players {
 		if !player.Live { // Dead man no union
 			player.Ununion()
-		} else if player.UnionValidation() && !player.Unioned.Live {
+		} else if !player.UnionValidation() {
 			player.Ununion()
 		}
 	}
@@ -469,7 +468,7 @@ func (g *Game) settleStageCheckUnion() {
 
 func (g *Game) settleStageExposePosition() {
 	for _, player := range g.Players {
-		if player.Unioned == nil && player.Live {
+		if !player.UnionValidation() {
 			player.StatusChange()
 		}
 	}

@@ -121,6 +121,7 @@ func (p *Player) Kill(reason PlayerKilledReason) {
 	}
 	p.Live = PlayerDead
 	p.KilledReason = reason
+	p.Ununion()
 	PlayerKillHint <- p
 	log.Printf("Player(%s) Killed for reason `%s`.\n", p.User.Name, reasonStrings[reason])
 }
@@ -178,7 +179,7 @@ func (p *Player) GetPositionString() string {
 // UnionValidation is
 func (p *Player) UnionValidation() bool {
 	defer func() { recover() }()
-	return p.Unioned != nil && p.Unioned.Unioned != nil && p.Unioned.Unioned == p
+	return p.Unioned != nil && p.Unioned.Unioned != nil && p.Unioned.Unioned == p && p.Unioned.Live && p.Live
 }
 
 //UnionCorrection is
