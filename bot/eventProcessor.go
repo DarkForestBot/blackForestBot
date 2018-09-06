@@ -219,12 +219,13 @@ func (b *Bot) onGameTimeOutOperation(game *models.Game) {
 		}
 		if len(player.UnionReqRecv) != 0 {
 			for _, msg := range player.UnionReqRecv {
+				langSet := getLang(msg.From.User.TgUserID)
 				controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 					player.User.TgUserID, msg.Msg.MessageID,
 					tgApi.InlineKeyboardMarkup{},
 				)
 				if _, err := b.MarkdownMessage(
-					msg.From.User.TgUserID, msg.From.User.Language, "unionfailed", nil,
+					msg.From.User.TgUserID, langSet, "unionfailed", nil,
 				); err != nil {
 					log.Println("ERROR:", err)
 				}
@@ -232,8 +233,9 @@ func (b *Bot) onGameTimeOutOperation(game *models.Game) {
 			player.UnionReqRecv = []*models.UnionReqRecv{}
 		}
 		if game.IsDay {
+			langSet := getLang(player.User.TgUserID)
 			if _, err := b.MarkdownMessage(
-				player.User.TgUserID, player.User.Language, "timeoutday", nil,
+				player.User.TgUserID, langSet, "timeoutday", nil,
 			); err != nil {
 				log.Println("ERROR:", err)
 			}
@@ -244,6 +246,10 @@ func (b *Bot) onGameTimeOutOperation(game *models.Game) {
 func (b *Bot) onAbortPlayerHint(player *models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		player.User.TgUserID, player.OperationMsg,
+		tgApi.InlineKeyboardMarkup{},
+	)
 	langSet := player.User.Language
 	if _, err := b.MarkdownMessage(
 		player.User.TgUserID, langSet, "timeoutnight", nil,
@@ -420,6 +426,9 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		players[0].User.TgUserID, players[0].UnionReq, tgApi.InlineKeyboardMarkup{},
 	)
+	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		players[1].User.TgUserID, players[1].UnionReq, tgApi.InlineKeyboardMarkup{},
+	)
 
 	for _, msg := range players[0].UnionReqRecv {
 		controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
@@ -433,10 +442,23 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 			}
 		}
 	}
+	for _, msg := range players[1].UnionReqRecv {
+		controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
+		)
+		if msg.From != players[0] {
+			if _, err := b.MarkdownMessage(
+				msg.From.User.TgUserID, msg.From.User.Language, "unionfailed", nil,
+			); err != nil {
+				log.Println("ERROR:", err)
+			}
+		}
+	}
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
 	players[0].UnionReqRecv = []*models.UnionReqRecv{}
+	players[1].UnionReqRecv = []*models.UnionReqRecv{}
 }
 
 func (b *Bot) onUnionRejectHint(players []*models.Player) {
@@ -529,7 +551,7 @@ func (b *Bot) onWinGameHint(game *models.Game) {
 	langSet := game.TgGroup.Lang
 	if _, err := b.GifMessage(
 		game.TgGroup.TgGroupID, langSet, "win",
-		config.DefaultImages.Win, game.Winner,
+		config.DefaultImages.Win, game.Winner.User,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}

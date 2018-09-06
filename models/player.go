@@ -185,7 +185,9 @@ func (p *Player) GetPositionString() string {
 // UnionValidation is
 func (p *Player) UnionValidation() bool {
 	defer func() { recover() }()
-	return p.Unioned != nil && p.Unioned.Unioned != nil && p.Unioned.Unioned == p && p.Unioned.Live && p.Live
+	return p.Unioned != nil && p.Unioned.Unioned != nil &&
+		p.Unioned.Unioned == p && p.Unioned.Live && p.Live &&
+		p.Unioned != p
 }
 
 //UnionCorrection is

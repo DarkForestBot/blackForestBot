@@ -198,6 +198,29 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 		return errors.New("No such target player")
 	}
 
+	// You cannot union your self!
+	if targetPlayer == srcPlayer {
+		return errors.New("Union self")
+	}
+
+	// check select each other
+	for _, msg := range srcPlayer.UnionReqRecv {
+		if msg.From == targetPlayer {
+
+			if targetPlayer.UnionValidation() {
+				break
+			} else {
+				var lock sync.RWMutex
+				lock.Lock()
+				defer lock.Unlock()
+				targetPlayer.Union(srcPlayer)
+				models.UnionAcceptHint <- []*models.Player{srcPlayer, targetPlayer}
+				models.UnionAcceptHint <- []*models.Player{targetPlayer, srcPlayer}
+			}
+			return nil
+		}
+	}
+
 	// if target has union, you cannot union.
 	if targetPlayer.UnionValidation() {
 		models.UnionRejectHint <- []*models.Player{targetPlayer, srcPlayer}
@@ -242,9 +265,12 @@ func btnUnionAccept(arg string, act *tgApi.CallbackQuery) error {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
-
-	targetPlayer.Union(srcPlayer)
-	models.UnionAcceptHint <- []*models.Player{srcPlayer, targetPlayer}
+	if !targetPlayer.UnionValidation() {
+		targetPlayer.Union(srcPlayer)
+		models.UnionAcceptHint <- []*models.Player{srcPlayer, targetPlayer}
+	} else {
+		models.UnionRejectHint <- []*models.Player{targetPlayer, srcPlayer}
+	}
 	return nil
 }
 

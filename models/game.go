@@ -342,6 +342,10 @@ func (g *Game) winloseCheck() bool {
 
 // core logic!
 func (g *Game) settle() {
+	// Stage 0: Correction Union.
+	for _, player := range g.Players {
+		player.UnionCorrection()
+	}
 	// Stage I: tag the target and beast the player abort
 	g.settleStageTag()
 	// Stage II: check betray.
@@ -462,17 +466,13 @@ func (g *Game) settleStageCheckTrap() {
 
 func (g *Game) settleStageCheckUnion() {
 	for _, player := range g.Players {
-		if !player.Live { // Dead man no union
-			player.Ununion()
-		} else if !player.UnionValidation() {
-			player.Ununion()
-		}
+		player.UnionCorrection()
 	}
 }
 
 func (g *Game) settleStageExposePosition() {
 	for _, player := range g.Players {
-		if !player.UnionValidation() {
+		if !player.UnionValidation() && player.Live {
 			player.StatusChange()
 		}
 	}
