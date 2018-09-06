@@ -56,7 +56,7 @@ Or you may use [official bot](https://t.me/dark_forest_game_bot)
 Donation
 ----
 
-<img src=".readmy/alipay.jpg" alt="alipay" height=600>
-<img src=".readmy/wechat.jpg" alt="wechat" height=600>
+<img src=".readme/alipay.jpg" alt="alipay" height=600>
+<img src=".readme/wechat.jpg" alt="wechat" height=600>
 
 [PayPal](paypal.me/tonychee7000)
