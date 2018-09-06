@@ -57,6 +57,8 @@ func AddGameQueue(ID int64, element models.QueueElement) error {
 	if err != nil {
 		if gameQueue == nil {
 			gameQueue = make([]models.QueueElement, 0)
+		} else {
+			return err
 		}
 	}
 	gameQueue = append(gameQueue, element)
