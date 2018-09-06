@@ -95,6 +95,14 @@ func (u *User) CheckAchivement() {
 	u.achivementCheck(&(u.BeUnionedAchive), AchivementBeUnioned, u.BeUnionedCount, 5, 20, true)
 }
 
+//GetWinRate is
+func (u *User) GetWinRate() string {
+	if u.GamesJoined == 0 {
+		return "-"
+	}
+	return fmt.Sprintf("%d", u.GamesWon*100/u.GamesJoined)
+}
+
 func (u *User) String() string {
 	return fmt.Sprintf("User(TgUserID=%d TgUserName=`%s` Name=`%s` Language=`%s`)",
 		u.TgUserID, u.TgUserName, u.Name, u.Language)
