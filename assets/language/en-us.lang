@@ -6,64 +6,64 @@
 # "\n" is used as new line. "{{.Blah}}" will be replaced by program, please keep it as is.
 meta:language=English
 trans:test=Test
-trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from gamep \\[Group]\n/extend \\[time] Extend time of joining a game, default extends 30s. \\[Group]\n/stats \\[someone] Show stats for someone, default self \\[Group/PM]\n/forcestart Force start a game\\[Group]\n/players Show players who joined the game\\[Group]\n/nextgame Will PM to notice when have a new game.\\[Group]\n\nRules:\n1. Every player will get a position `(x, y)` (`x` and `y` are double of players). Every player can shoot at a position every night. Player will be killed when someone shoot at its position.\n2. Every shoot would expose one of axes of his position.\n3. Player would convert to a BEAST when all axes of his position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will have 1/3 chance to survive, dead of become to BEAST. The BEAST will have half chance to death.\n5. Two players can unite each other, only of they know.\n6. Players who join a union would not expose his position.\n7. Player can betray its union at night and kill another one, no position is needed. Players who teamed up each other betrayed each other would be BEAST.\n8. Player can set a trap at night, player who betrayed you will be killed. However, you would be BEAST if no one betrayed you.\n9. Only one player live, or all DEAD
-trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](@tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)
+trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from game \\[Group]\n/extend \\[time] Extend time of joining a game, extends 30s in default. \\[Group]\n/stats \\[someone] Show stats for player. \\[Group/PM]\n/forcestart Force start a game\\[Group]\n/players Show players who joined this game\\[Group]\n/nextgame A notification will be sent to you when a new game starts.\\[Group]\n\nRules:\n1. Every player receive a coordinate `(x, y)` as their position at the beginning of a game. Every player can shoot at a coordinate every night. You're dead if shot.\n2. Every shot exposes one of coordinate of your position(it is, your horizontal ordinate OR your vertical ordinate.).\n3. Player will be converted to a BEAST when his exact position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will have an even chance to live, die or become a BEAST. The BEAST will have half chance to die.\n5. Two players can unite each other without being noticed.\n6. Players who join a union would not expose his position when firing.\n7. Player can betray his union at night and kill his partner, no position is needed. The betrayer will turn into a BEAST.\n8. Player can setup a trap at night, killing who want to betray you. However, you would turn into BEAST if no one betrayed you.\n9. Only one player lives, or None lives.
+trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](https//t.me/tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)\nDonation: [https://bit.ly/2wUFesj](https://bit.ly/2wUFesj)
 trans:startgame=[{{.Name}}](tg://user?id={{.TgUserID}}) leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
 trans:join=Join
-trans:registerneeded=You need to start a private chat to me, and `/start` it.
+trans:registerneeded=You need to start a private chat with me first, and `/start` it.
 trans:grouponly=You can *only* use this command in a group.
 trans:chatonly=You can *only* use this command in a private chat.
 trans:badpassword=Invalid password.
 trans:adminon=Admin mode *ON*.\nTo leave admin mode, use /admin without any argument.
 trans:adminoff=Admin mode *OFF*.
 trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id={{.TgUserID}})\n{{end}}
-trans:gamecancelled=No enough players joined, game cancelled.
+trans:gamecancelled=Players not enough, game cancelled.
 trans:gamestart=Game start!
 trans:jointime={{.}} Left! Be quick!
-trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) has joined the game.
+trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) has joined this game.
 trans:joinsuccess=You have joined the game in {{.Name}}.
 trans:onplayers=Here is the players joined.
 trans:getposition=Your position is `({{.Position.X}}, {{.Position.Y}})`\n*DO NOT TELL OTHERS!*
 trans:flee=[{{.Name}}](tg://user?id={{.TgUserID}}) has left this dangerous place.
 trans:noflee=[{{.Name}}](tg://user?id={{.TgUserID}}): It's too late to leave here!
-trans:setlang=Which language do you need?
-trans:hasgame=There has already had a game.
-trans:nogame=There no game available, use /startgame to make new one.
-trans:gamequeue=You have already in the queue of {{.}}.\nWhen game start, I will PM you!
+trans:setlang=Which language do you prefer?
+trans:hasgame=A game is ongoing.
+trans:nogame=There's no game ongoing, use /startgame to make new one.
+trans:gamequeue=You are now queuing for game in {{.}}.\nWhen game start, I will PM you!
 trans:newgame=There is a new game in {{.}}\nGo quickly!
 trans:cancel=Cancel
 trans:ok=OK
-trans:noenoughplayers=At least *6* players to start a game!
+trans:noenoughplayers=At least *6* players is needed to start a game!
 trans:langchanged=OK! I will show message in English.
-trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{.GetWinRate}}%\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
+trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{.GetWinRate}}%\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Requested*: {{.UnionCount}}\n*Union Succeded*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
 trans:accept=✅ Accept
 trans:reject=❎ Reject
-trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna team up with you. Do you want to accept with it?
+trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) want to team up with you. Do you want to accept it?
 trans:unionhint=Now you can choose a player to team up with, who do you want?
 trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) has accepted your request.
 trans:unionfailed=Union failed
 trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
 trans:operhint1=Now, it's your turn!\nChoose the position you want to shoot below as **x**, and then **y** by the comming message.\n(Abort: abort all operations this night, and god knows what will happen to you.)
-trans:operhint2=OK, now you can choose **y** axis of a position.
+trans:operhint2=OK, now you can choose **y** ordinate of a position.
 trans:operapproved=Your operation is approved.
 trans:skip=Skip
-trans:onday=Now is day and every player can choose another one for a union. Go ahead!\nYou have 120 seconds to take action.
-trans:onnight=New is night and here comes the most brute time. Your choice means your FATE!\nYou have 60 seconds to take action.
+trans:onday=It's day and every player can seek an union. Go ahead!\nYou have 120 seconds to take action.
+trans:onnight=It's night and killing starts. Your choice means your FATE!\nYou have 60 seconds to take action.
 trans:betray=Betray
 trans:trap=Trap
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
 trans:lose=#Lose Oops! ALL dead.
 trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
-trans:timeoutnight=Time out! Your fate choose your life!
-trans:timeoutday=It's sunset now. stop finding your pal.
-trans:joinachat=Hello everyone, I am a bot which play a game called `DarkForest` like PUBG.\n/help Show help.
+trans:timeoutnight=Time out! You let dice decide your life!
+trans:timeoutday=It's sunset now. Stop finding your pal.
+trans:joinachat=Hello everyone, I am a bot running a game called `DarkForest` like PUBG.\n/help Show help.
 trans:receivegif=Got image `{{.}}`
 trans:onstart=Hi, you have registered already.
-trans:beast=You were knockout by lightning...\nWhen you wake up again, a *BEAST* you are!
+trans:beast=You were struck by lightning...\nWhen you wake up again, a *BEAST* you are!
 trans:survive=Thanks God! Nothing is the best thing!
 trans:killed0=A bullet hit you when you were in a panic in this suck place...\n*Now You DEAD!*
-trans:killed1=That man who you beleved in was shooting at you...\n*Now You DEAD!*
-trans:killed2=You were trapped when you were shooting at your friend...\n*Now You DEAD!*
+trans:killed1=That man you believed in shot you...\n*Now You DEAD!*
+trans:killed2=You were trapped when you were about to shoot your friend...\n*Now You DEAD!*
 trans:killed3=You were hit by a meteor...\n*Now You DEAD!*
 trans:killed4=A beast rushed to you when you were shooting at it...\n*Now You DEAD!*
 trans:killed5=You killed that beast, but you were suffering heavy wound...\n*Now You DEAD!*
