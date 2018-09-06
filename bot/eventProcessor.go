@@ -35,7 +35,7 @@ func (b *Bot) onNewGameHint(game *models.Game) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	langSet := game.TgGroup.Lang
+	langSet := getLang(game.TgGroup.TgGroupID)
 	var (
 		msg tgApi.Message
 		err error
@@ -78,7 +78,7 @@ func (b *Bot) onNewGameHint(game *models.Game) {
 func (b *Bot) onUserJoinHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := user.TgGroupJoinGame.Lang
+	langSet := getLang(user.TgGroupJoinGame.TgGroupID)
 	//Step I: Join game hint in group
 	if _, err := b.MarkdownMessage(
 		user.TgGroupJoinGame.TgGroupID, langSet, "joingame", user,
@@ -86,7 +86,7 @@ func (b *Bot) onUserJoinHint(user *models.User) {
 		log.Println("ERROR:", err)
 	}
 	//Setp II: PM user join success.
-	langSet = user.Language
+	langSet = getLang(user.TgUserID)
 	if _, err := b.MarkdownMessage(
 		user.TgUserID, langSet, "joinsuccess", user.TgGroupJoinGame,
 	); err != nil {
@@ -97,7 +97,8 @@ func (b *Bot) onUserJoinHint(user *models.User) {
 func (b *Bot) onGameFleeHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := user.TgGroupJoinGame.Lang
+
+	langSet := getLang(user.TgGroupJoinGame.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		user.TgGroupJoinGame.TgGroupID, langSet, "flee", user,
 	); err != nil {
@@ -108,7 +109,8 @@ func (b *Bot) onGameFleeHint(user *models.User) {
 func (b *Bot) onGameNoFleeHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := user.TgGroupJoinGame.Lang
+
+	langSet := getLang(user.TgGroupJoinGame.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		user.TgGroupJoinGame.TgGroupID, langSet, "noflee", user,
 	); err != nil {
@@ -119,7 +121,8 @@ func (b *Bot) onGameNoFleeHint(user *models.User) {
 func (b *Bot) onNotEnoughPlayersHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "noenoughplayers", nil,
 	); err != nil {
@@ -133,7 +136,8 @@ func (b *Bot) onJoinTimeLeftHint(game *models.Game) {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	msg, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "jointime",
 		fmt.Sprintf("%02d:%02d", game.TimeLeft/60, game.TimeLeft%60),
@@ -163,7 +167,8 @@ func (b *Bot) onStartGameFailed(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
 	b.startGameClearMessage(game)
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "gamecancelled", nil,
 	); err != nil {
@@ -172,17 +177,21 @@ func (b *Bot) onStartGameFailed(game *models.Game) {
 }
 
 func (b *Bot) onStartGameSuccess(game *models.Game) {
+	threadLimitPool <- 1
+	defer releaseThreadPool()
+
 	b.startGameClearMessage(game)
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "gamestart", nil,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
 	for _, player := range game.Players {
+		langSet := getLang(player.User.TgUserID)
 		if _, err := b.MarkdownMessage(
-			player.User.TgUserID, player.User.Language,
-			"getposition", player,
+			player.User.TgUserID, langSet, "getposition", player,
 		); err != nil {
 			log.Println("ERROR:", err)
 		}
@@ -250,7 +259,7 @@ func (b *Bot) onAbortPlayerHint(player *models.Player) {
 		player.User.TgUserID, player.OperationMsg,
 		tgApi.InlineKeyboardMarkup{},
 	)
-	langSet := player.User.Language
+	langSet := getLang(player.User.TgUserID)
 	if _, err := b.MarkdownMessage(
 		player.User.TgUserID, langSet, "timeoutnight", nil,
 	); err != nil {
@@ -261,7 +270,8 @@ func (b *Bot) onAbortPlayerHint(player *models.Player) {
 func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "onday", nil,
 	); err != nil {
@@ -278,7 +288,7 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 	defer lock.Unlock()
 	for _, player := range game.Players {
 		if player.Live && !player.UnionValidation() {
-			langSet = player.User.Language
+			langSet = getLang(player.User.TgUserID)
 			msg, err := b.MarkdownMessage(
 				player.User.TgUserID, langSet, "unionhint", nil,
 				makeUnionButtons(game, player),
@@ -295,7 +305,8 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownMessage(
 		game.TgGroup.TgGroupID, langSet, "onnight", nil,
 	); err != nil {
@@ -308,7 +319,7 @@ func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 
 	for _, player := range game.Players {
 		if player.Live {
-			langSet = player.User.Language
+			langSet := getLang(player.User.TgUserID)
 			if _, err := b.MarkdownMessage(
 				player.User.TgUserID, langSet, "gameplayers", game,
 			); err != nil {
@@ -335,7 +346,7 @@ func (b *Bot) onShootXHint(player *models.Player) {
 		tgApi.InlineKeyboardMarkup{},
 	)
 	if player.Live {
-		langSet := player.User.Language
+		langSet := getLang(player.User.TgUserID)
 		msg, err := b.MarkdownMessage(
 			player.User.TgUserID, langSet, "operhint2", nil,
 			makeNightOperations(player.User.TgGroupJoinGame.TgGroupID, player, 1),
@@ -350,6 +361,7 @@ func (b *Bot) onShootXHint(player *models.Player) {
 func (b *Bot) onShootYHint(player *models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
@@ -363,7 +375,8 @@ func (b *Bot) onShootYHint(player *models.Player) {
 func (b *Bot) onUnionReqHint(players []*models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := players[1].User.Language
+
+	langSet := getLang(players[1].User.TgUserID)
 	mk := tgApi.NewInlineKeyboardMarkup(
 		tgApi.NewInlineKeyboardRow(
 			tgApi.NewInlineKeyboardButtonData(
@@ -391,7 +404,7 @@ func (b *Bot) onUnionReqHint(players []*models.Player) {
 
 	// Step II: req has sent
 	if _, err := b.MarkdownMessage(
-		players[0].User.TgUserID, players[0].User.Language,
+		players[0].User.TgUserID, getLang(players[0].User.TgUserID),
 		"unionreqsent", players[1].User,
 	); err != nil {
 		log.Println("ERROR:", err)
@@ -417,8 +430,9 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
 	// 0: button clicker, 1: reply to
+	langSet := getLang(players[1].User.TgUserID)
 	if _, err := b.MarkdownMessage(
-		players[1].User.TgUserID, players[1].User.Language, "unionsuccess", players[0].User,
+		players[1].User.TgUserID, langSet, "unionsuccess", players[0].User,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -435,8 +449,9 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 		)
 		if msg.From != players[1] {
+			langSet := getLang(msg.From.User.TgUserID)
 			if _, err := b.MarkdownMessage(
-				msg.From.User.TgUserID, msg.From.User.Language, "unionfailed", nil,
+				msg.From.User.TgUserID, langSet, "unionfailed", nil,
 			); err != nil {
 				log.Println("ERROR:", err)
 			}
@@ -447,8 +462,9 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},
 		)
 		if msg.From != players[0] {
+			langSet := getLang(msg.From.User.TgUserID)
 			if _, err := b.MarkdownMessage(
-				msg.From.User.TgUserID, msg.From.User.Language, "unionfailed", nil,
+				msg.From.User.TgUserID, langSet, "unionfailed", nil,
 			); err != nil {
 				log.Println("ERROR:", err)
 			}
@@ -466,8 +482,9 @@ func (b *Bot) onUnionRejectHint(players []*models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
 	// 0: button clicker, 1: reply to
+	langSet := getLang(players[1].User.TgUserID)
 	if _, err := b.MarkdownMessage(
-		players[1].User.TgUserID, players[1].User.Language, "unionfailed", nil,
+		players[1].User.TgUserID, langSet, "unionfailed", nil,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
@@ -493,25 +510,25 @@ func (b *Bot) onUnionRejectHint(players []*models.Player) {
 func (b *Bot) onPlayersHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+	langSet := getLang(game.TgGroup.TgGroupID)
 	controllers.EditMessageTextEvent <- tgApi.NewEditMessageText(
 		game.TgGroup.TgGroupID, game.MsgSent.PlayerList,
-		lang.T(game.TgGroup.Lang, "players", game),
+		lang.T(langSet, "players", game),
 	)
 }
 
 func (b *Bot) onPlayerKillHint(player *models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	var (
-		image   string
-		langSet string
-	)
+	var image string
+
 	if player.KilledReason == models.Trapped {
 		image = config.DefaultImages.Trapped
 	} else {
 		image = config.DefaultImages.Killed
 	}
-	langSet = player.User.Language
+
+	langSet := getLang(player.User.TgUserID)
 	if _, err := b.GifMessage(
 		player.User.TgUserID, langSet,
 		fmt.Sprintf("killed%d", player.KilledReason),
@@ -524,7 +541,8 @@ func (b *Bot) onPlayerKillHint(player *models.Player) {
 func (b *Bot) onPlayerBeastHint(player *models.Player) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := player.User.Language
+
+	langSet := getLang(player.User.TgUserID)
 	if _, err := b.GifMessage(
 		player.User.TgUserID, langSet, "beast",
 		config.DefaultImages.Beast, nil,
@@ -536,7 +554,8 @@ func (b *Bot) onPlayerBeastHint(player *models.Player) {
 func (b *Bot) onGameLoseHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.GifMessage(
 		game.TgGroup.TgGroupID, langSet, "lose",
 		config.DefaultImages.Lose, nil,
@@ -548,7 +567,8 @@ func (b *Bot) onGameLoseHint(game *models.Game) {
 func (b *Bot) onWinGameHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.GifMessage(
 		game.TgGroup.TgGroupID, langSet, "win",
 		config.DefaultImages.Win, game.Winner.User,
@@ -560,7 +580,8 @@ func (b *Bot) onWinGameHint(game *models.Game) {
 func (b *Bot) onGetPlayersHint(game *models.Game) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := game.TgGroup.Lang
+
+	langSet := getLang(game.TgGroup.TgGroupID)
 	if _, err := b.MarkdownReply(
 		game.TgGroup.TgGroupID, langSet, "onplayers",
 		game.MsgSent.PlayerList, nil,
@@ -572,6 +593,7 @@ func (b *Bot) onGetPlayersHint(game *models.Game) {
 func (b *Bot) onUserStatsHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
+
 	langSet := getLang(user.QueryMsg.Chat.ID)
 	if _, err := b.MarkdownReply(
 		user.QueryMsg.Chat.ID, langSet, "userstats",
@@ -584,7 +606,7 @@ func (b *Bot) onUserStatsHint(user *models.User) {
 func (b *Bot) onJoinAChatEvent(msg *tgApi.Message) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := "English"
+	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownMessage(
 		msg.Chat.ID, langSet, "joinachat", nil,
 	); err != nil {
@@ -595,7 +617,7 @@ func (b *Bot) onJoinAChatEvent(msg *tgApi.Message) {
 func (b *Bot) onReceiveAnimationEvent(msg *tgApi.Message) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := getLang(int64(msg.Chat.ID))
+	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownReply(
 		msg.Chat.ID, langSet, "receivegif",
 		msg.MessageID, msg.Document.FileName,
@@ -607,7 +629,7 @@ func (b *Bot) onReceiveAnimationEvent(msg *tgApi.Message) {
 func (b *Bot) onPMOnlyEvent(msg *tgApi.Message) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := getLang(int64(msg.Chat.ID))
+	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownReply(
 		msg.Chat.ID, langSet, "chatonly",
 		msg.MessageID, nil,
@@ -619,7 +641,7 @@ func (b *Bot) onPMOnlyEvent(msg *tgApi.Message) {
 func (b *Bot) onGroupOnlyEvent(msg *tgApi.Message) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := getLang(int64(msg.Chat.ID))
+	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownReply(
 		msg.Chat.ID, langSet, "grouponly",
 		msg.MessageID, nil,
@@ -631,7 +653,7 @@ func (b *Bot) onGroupOnlyEvent(msg *tgApi.Message) {
 func (b *Bot) onStartEvent(msg *tgApi.Message) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := getLang(int64(msg.Chat.ID))
+	langSet := getLang(msg.Chat.ID)
 	if _, err := b.MarkdownMessage(
 		msg.Chat.ID, langSet, "onstart", nil,
 	); err != nil {
@@ -827,7 +849,7 @@ func (b *Bot) onOperationApprovedEvent(act *tgApi.CallbackQuery) {
 }
 
 func (b *Bot) onPlayerSurvivedAtNightHint(player *models.Player) {
-	langSet := player.User.Language
+	langSet := getLang(player.User.TgUserID)
 	if _, err := b.MarkdownMessage(
 		player.User.TgUserID, langSet, "survive", nil,
 	); err != nil {

@@ -82,6 +82,9 @@ type Player struct {
 
 //NewPlayer is called when start a game
 func NewPlayer(user *User, position *Position) *Player {
+	if user == nil || position == nil {
+		return nil
+	}
 	player := new(Player)
 	player.User = user
 	player.Live = PlayerLive
@@ -97,6 +100,12 @@ func NewPlayer(user *User, position *Position) *Player {
 
 //Union is used when a union request approved.
 func (p *Player) Union(fromPlayer *Player) {
+	// Check it.
+	if fromPlayer == nil || fromPlayer == p ||
+		p.UnionValidation() || fromPlayer.UnionValidation() {
+		return
+	}
+
 	p.Unioned = fromPlayer
 	fromPlayer.Unioned = p
 	fromPlayer.User.UnionSuccessCount++
@@ -132,6 +141,11 @@ func (p *Player) Shoot(betray bool, pos *Position) *Operation {
 		return NewOperation(p, Shoot, p.Unioned.Position)
 	}
 	return NewOperation(p, Shoot, pos)
+}
+
+//Betray is
+func (p *Player) Betray() *Operation {
+	return NewOperation(p, Betray, p.Unioned.Position)
 }
 
 //Abort is
