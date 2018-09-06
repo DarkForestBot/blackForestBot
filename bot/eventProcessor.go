@@ -417,6 +417,10 @@ func (b *Bot) onUnionAcceptHint(players []*models.Player) {
 		log.Println("ERROR:", err)
 	}
 
+	controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
+		players[0].User.TgUserID, players[0].UnionReq, tgApi.InlineKeyboardMarkup{},
+	)
+
 	for _, msg := range players[0].UnionReqRecv {
 		controllers.RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 			msg.Msg.Chat.ID, msg.Msg.MessageID, tgApi.InlineKeyboardMarkup{},

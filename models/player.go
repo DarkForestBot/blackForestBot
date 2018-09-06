@@ -139,6 +139,12 @@ func (p *Player) Abort() *Operation {
 	return NewOperation(p, Abort, nil)
 }
 
+//SetTrap is
+func (p *Player) SetTrap() *Operation {
+	p.TrapSet = true
+	return NewOperation(p, Trap, nil)
+}
+
 // ActionClear is
 func (p *Player) ActionClear() {
 	p.ShootX = PlayerShootNone

@@ -326,7 +326,7 @@ func btnTrap(arg string, act *tgApi.CallbackQuery) error {
 		return errors.New("No such game")
 	}
 	player := game.GetPlayer(int64(act.From.ID))
-	player.TrapSet = true
+	game.AttachOperation(player.SetTrap())
 	RemoveMessageMarkUpEvent <- tgApi.NewEditMessageReplyMarkup(
 		player.User.TgUserID, act.Message.MessageID, tgApi.InlineKeyboardMarkup{})
 	OperationApprovedEvent <- act
