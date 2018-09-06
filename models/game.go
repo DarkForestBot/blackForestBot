@@ -145,6 +145,10 @@ func (g *Game) Start() error {
 	lock.Lock()
 	defer lock.Unlock()
 	debug := 1
+	if g.Status != GameNotStart {
+		return nil
+	}
+
 	if config.DefaultConfig.Debug {
 		debug++
 	}
