@@ -34,7 +34,7 @@ trans:cancel=取消
 trans:ok=确定
 trans:noenoughplayers=至少需要*6*名玩家才能开始游戏！
 trans:langchanged=好啦！我现在会使用简体中文说话！
-trans:userstats=*{{.Name}}信息统计*\n--------\n*获得成就*: {{.AchiveRewardedCount}}\n*加入游戏*: {{.GamesJoined}}\n*游戏胜利*: {{.GamesWon}}\n*胜率*: {{.GetWinRate}}%\n*开枪次数*: {{.ShootCount}}\n*背叛次数*: {{.BetrayCount}}\n*设陷阱次数*: {{.TrapCount}}\n*被陷阱杀死*: {{.KilledByTrapCount}}\n*杀人次数*: {{.KillCount}}\n*盲杀次数*: {{.GuessKillCount}}\n*狙杀次数*: {{.SniperKillCount}}\n*发送结盟*: {{.UnionCount}}\n*结盟成功*: {{.UnionSuccessCount}}\n*接收结盟*: {{.BeUnionedCount}}
+trans:userstats=*{{.Name}}信息统计*\n--------\n*获得成就*: {{.AchiveRewardedCount}}\n*加入游戏*: {{.GamesJoined}}\n*游戏胜利*: {{.GamesWon}}\n*胜率*: {{.GetWinRate}}%\n*开枪次数*: {{.ShootCount}}\n*背叛次数*: {{.BetrayCount}}\n*设陷阱次数*: {{.TrapCount}}\n*被陷阱杀死*: {{.KilledByTrapCount}}\n*杀人次数*: {{.KillCount}}\n*盲杀次数*: {{.GuessKillCount}}\n*狙杀次数*: {{.SniperKillCount}}\n*发送结盟*: {{.UnionCount}}\n*结盟成功*: {{.UnionSuccessCount}}\n*接受结盟*: {{.BeUnionedCount}}
 trans:accept=✅ 接受
 trans:reject=❎ 拒绝
 trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) 想与你结盟，你愿意吗？
