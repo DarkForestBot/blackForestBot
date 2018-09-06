@@ -251,9 +251,6 @@ func (g *Game) RunCheck() {
 		fallthrough
 	default:
 		g.Cron.Stop()
-		for _, user := range g.Users {
-			user.CheckAchivement()
-		}
 	}
 }
 
@@ -335,6 +332,10 @@ func (g *Game) winloseCheck() bool {
 		g.Winner = pl[0]
 		WinGameHint <- g
 		g.Status = GameOver
+		// moved here to check achivement
+		for _, player := range g.Players {
+			player.User.CheckAchivement()
+		}
 		return true
 	}
 	return false

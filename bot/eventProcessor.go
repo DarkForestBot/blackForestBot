@@ -16,7 +16,7 @@ import (
 func (b *Bot) onAchivementRewardedHint(user *models.User) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := user.Language
+	langSet := getLang(user.TgUserID)
 	_, err := b.MarkdownMessage(
 		user.TgUserID, langSet, "achivementrewarded",
 		lang.T(
