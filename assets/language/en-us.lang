@@ -35,7 +35,7 @@ trans:cancel=Cancel
 trans:ok=OK
 trans:noenoughplayers=At least *6* players to start a game!
 trans:langchanged=OK! I will show message in English.
-trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{.GetWinRate}}\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
+trans:userstats=*Stats of {{.Name}}*\n--------\n*Achivement Rewarded*: {{.AchiveRewardedCount}}\n*Game Joined*: {{.GamesJoined}}\n*Game Win*: {{.GamesWon}}\n*Win Rate*: {{.GetWinRate}}%\n*Shoot Count*: {{.ShootCount}}\n*Betray Count*: {{.BetrayCount}}\n*Trap Count*: {{.TrapCount}}\n*Killed by trap*: {{.KilledByTrapCount}}\n*Kill Count*: {{.KillCount}}\n*Guess Kill Count*: {{.GuessKillCount}}\n*Sniper Kill Count*{{.SniperKillCount}}\n*Union Request*: {{.UnionCount}}\n*Union Success*: {{.UnionSuccessCount}}\n*Union Received*: {{.BeUnionedCount}}
 trans:accept=✅ Accept
 trans:reject=❎ Reject
 trans:unionreq=[{{.Name}}](tg://user?id={{.TgUserID}}) wanna team up with you. Do you want to accept with it?
