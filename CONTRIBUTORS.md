@@ -11,7 +11,7 @@ English
 * [Hermittttt](https://t.me/Hermittttt)
 
 
-Resource
+Resources
 ===
 
 Images
