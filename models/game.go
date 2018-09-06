@@ -85,6 +85,10 @@ func (g *Game) Extend(timeSecond int) {
 	lock.Lock()
 	defer lock.Unlock()
 
+	if timeSecond < 0 {
+		timeSecond = -timeSecond
+	}
+
 	if g.Status == GameNotStart {
 		g.TimeLeft += timeSecond
 		if g.TimeLeft >= consts.FiveMinutes {
