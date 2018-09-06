@@ -55,7 +55,7 @@ func ClearGameQueue(ID int64) error {
 func AddGameQueue(ID int64, element models.QueueElement) error {
 	gameQueue, err := GetGameQueue(ID)
 	if err != nil {
-		return err
+		gameQueue = make([]models.QueueElement, 0)
 	}
 	gameQueue = append(gameQueue, element)
 	return UpdateGameQueue(ID, gameQueue)
