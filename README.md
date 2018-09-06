@@ -52,3 +52,10 @@ You may need to upload some gif for running this game. Just run the bot, and inp
 Then just upload gif to the bot with filename in *win*, *lose*, *start*, *killed*, *trapped*, *beast* and finally use `/admin` without password to make admin mode **OFF**.
 
 Or you may use [official bot](https://t.me/dark_forest_game_bot)
+
+Donation
+----
+
+![alipay](.readme/alipay.jpg)
+![wechat](.readme/wechat.jpg)
+[PayPal](paypal.me/tonychee7000)
