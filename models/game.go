@@ -250,7 +250,6 @@ func (g *Game) RunCheck() {
 	case GameOver:
 		fallthrough
 	default:
-		g.Cron.Stop()
 	}
 }
 
@@ -315,7 +314,10 @@ func (g *Game) gameTimeCheck() {
 }
 
 func (g *Game) winloseCheck() bool {
-	var pl = make([]*Player, 0)
+	var (
+		pl     = make([]*Player, 0)
+		status = false
+	)
 	for _, player := range g.Players {
 		if player.Live {
 			pl = append(pl, player)
@@ -325,7 +327,7 @@ func (g *Game) winloseCheck() bool {
 	if len(pl) == 0 { // All Dead
 		GameLoseHint <- g
 		g.Status = GameOver
-		return true
+		status = true
 	} else if len(pl) == 1 {
 		pl[0].User.GamesWon++
 		pl[0].User.Update()
@@ -333,12 +335,15 @@ func (g *Game) winloseCheck() bool {
 		WinGameHint <- g
 		g.Status = GameOver
 		// moved here to check achivement
+		status = true
+	}
+	if status {
+		g.Cron.Stop()
 		for _, player := range g.Players {
 			player.User.CheckAchivement()
 		}
-		return true
 	}
-	return false
+	return status
 }
 
 // core logic!
