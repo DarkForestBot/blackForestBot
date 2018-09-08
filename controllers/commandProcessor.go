@@ -196,7 +196,7 @@ func onAbout(msg *tgApi.Message, args ...string) error {
 func onAdmin(msg *tgApi.Message, args ...string) error {
 	if msg.Chat.ID < 0 {
 		PMOnlyEvent <- msg
-		return nil
+		return errors.New("pm only")
 	}
 	if args == nil || len(args) == 0 || args[0] == "" {
 		isAdminMode = false
