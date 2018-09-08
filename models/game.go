@@ -40,21 +40,39 @@ func newMsgSent() *msgSent {
 	return m
 }
 
+type globalOperation struct {
+	Player    *Player
+	Action    PlayerAction
+	Target    *Position // When result might nil
+	IsResult  bool
+	EachOther bool
+
+	//Result
+	Killed   *Player
+	BeKilled bool
+	BeBeast  bool
+	Survive  bool // for Abort
+	None     bool
+
+	Finally bool
+}
+
 //Game is
 type Game struct {
-	Round      int
-	IsDay      bool
-	Founder    *User
-	Users      []*User
-	Status     GameStatus
-	Positions  []*Position
-	Players    []*Player
-	TgGroup    *TgGroup
-	TimeLeft   int
-	MsgSent    *msgSent
-	Operations []*Operation // Every round will clear
-	Cron       *cron.Cron
-	Winner     *Player
+	Round            int
+	IsDay            bool
+	Founder          *User
+	Users            []*User
+	Status           GameStatus
+	Positions        []*Position
+	Players          []*Player
+	TgGroup          *TgGroup
+	TimeLeft         int
+	MsgSent          *msgSent
+	Operations       []*Operation // Every round will clear
+	GlobalOperations [][]globalOperation
+	Cron             *cron.Cron
+	Winner           *Player
 }
 
 //NewGame is to create a new game in the group
@@ -250,6 +268,7 @@ func (g *Game) RunCheck() {
 	case GameOver:
 		fallthrough
 	default:
+		g.Cron.Stop()
 	}
 }
 
@@ -280,7 +299,13 @@ func (g *Game) joinTimeCheck() {
 
 func (g *Game) gameTimeCheck() {
 	if g.TimeLeft != 0 {
-		if g.IsDay || len(g.Operations) != len(g.Players) {
+		var c = 0
+		for _, p := range g.Players {
+			if p.Live {
+				c++
+			}
+		}
+		if g.IsDay || len(g.Operations) != c {
 			return
 		}
 	}
@@ -325,6 +350,13 @@ func (g *Game) winloseCheck() bool {
 	}
 	log.Println("Current live:", pl)
 	if len(pl) == 0 { // All Dead
+		g.GlobalOperations[len(g.GlobalOperations)-1] = append(
+			g.GlobalOperations[len(g.GlobalOperations)-1],
+			globalOperation{
+				Finally:  true,
+				IsResult: true,
+			},
+		)
 		GameLoseHint <- g
 		status = true
 	} else if len(pl) == 1 {
@@ -332,11 +364,18 @@ func (g *Game) winloseCheck() bool {
 		pl[0].User.Update()
 		g.Winner = pl[0]
 		WinGameHint <- g
+		g.GlobalOperations[len(g.GlobalOperations)-1] = append(
+			g.GlobalOperations[len(g.GlobalOperations)-1],
+			globalOperation{
+				Player:   g.Winner,
+				Finally:  true,
+				IsResult: true,
+			},
+		)
 		status = true
 	}
 	if status {
 		g.Status = GameOver
-		g.Cron.Stop()
 		for _, player := range g.Players {
 			player.User.CheckAchivement()
 		}
@@ -350,55 +389,101 @@ func (g *Game) settle() {
 	for _, player := range g.Players {
 		player.UnionCorrection()
 	}
+	var operations = make([]globalOperation, 0)
 	// Stage I: tag the target and beast the player abort
-	g.settleStageTag()
+	g.settleStageTag(&operations)
 	// Stage II: check betray.
-	g.settleStageCheckBetry()
+	g.settleStageCheckBetry(&operations)
 	// Stage III: check who surely dead.
-	g.settleStageCheckDeath()
+	g.settleStageCheckDeath(&operations)
 	// Stage IV: check trap
-	g.settleStageCheckTrap()
+	g.settleStageCheckTrap(&operations)
 	// Stage V: check union
-	g.settleStageCheckUnion()
+	g.settleStageCheckUnion(&operations)
 	// Stage VI: expose position
-	g.settleStageExposePosition()
+	g.settleStageExposePosition(&operations)
 	// Stage O: Reset some status
 	for _, player := range g.Players {
+		g.GlobalOperations = append(g.GlobalOperations, operations)
 		g.Operations = make([]*Operation, 0)
 		player.ActionClear()
 		player.User.Update()
 	}
 }
 
-func (g *Game) settleStageTag() {
-	for _, opeartion := range g.Operations {
-		switch opeartion.Action {
+func (g *Game) settleStageTag(gop *[]globalOperation) {
+	for _, operation := range g.Operations {
+		(*gop) = append(*gop, globalOperation{
+			Player: operation.Player,
+			Action: operation.Action,
+			Target: operation.Target,
+		})
+		switch operation.Action {
 		case Shoot: // Betray is special shoot
-			if opeartion.Target != nil && opeartion.Target.Player != nil {
-				opeartion.Player.Target = opeartion.Target.Player
+			if operation.Target != nil && operation.Target.Player != nil {
+				operation.Player.Target = operation.Target.Player
+			} else {
+				operation.Player.User.ShootCount++
+				PlayerShootNothingHint <- operation.Player
+				(*gop) = append(*gop, globalOperation{
+					Player:   operation.Player,
+					Action:   operation.Action,
+					IsResult: true,
+				})
 			}
 		case Abort:
-			if opeartion.Player.Status < PlayerStatusBeast {
-				fate := rand.Intn(3)
+			rand.Seed(time.Now().Unix())
+			if operation.Player.Status < PlayerStatusBeast {
+				fate := rand.Intn(4) // 1/n rate
 				if fate == 0 {
-					opeartion.Player.StatusChange(PlayerStatusBeast)
+					operation.Player.StatusChange(PlayerStatusBeast)
+					(*gop) = append(*gop, globalOperation{
+						Player:   operation.Player,
+						Action:   operation.Action,
+						BeBeast:  true,
+						IsResult: true,
+					})
 				} else if fate == 1 {
-					opeartion.Player.Kill(Flee)
+					operation.Player.Kill(Flee)
+					(*gop) = append(*gop, globalOperation{
+						Player:   operation.Player,
+						Action:   operation.Action,
+						BeKilled: true,
+						IsResult: true,
+					})
 				} else {
-					PlayerSurvivedAtNightHint <- opeartion.Player
+					PlayerSurvivedAtNightHint <- operation.Player
+					(*gop) = append(*gop, globalOperation{
+						Player:   operation.Player,
+						Action:   operation.Action,
+						Survive:  true,
+						IsResult: true,
+					})
 				}
 			} else {
-				if rand.Intn(2) == 0 {
-					opeartion.Player.Kill(Flee)
+				if rand.Intn(3) == 0 { // 1/n
+					operation.Player.Kill(Flee)
+					(*gop) = append(*gop, globalOperation{
+						Player:   operation.Player,
+						Action:   operation.Action,
+						BeKilled: true,
+						IsResult: true,
+					})
 				} else {
-					PlayerSurvivedAtNightHint <- opeartion.Player
+					PlayerSurvivedAtNightHint <- operation.Player
+					(*gop) = append(*gop, globalOperation{
+						Player:   operation.Player,
+						Action:   operation.Action,
+						Survive:  true,
+						IsResult: true,
+					})
 				}
 			}
 		}
 	}
 }
 
-func (g *Game) settleStageCheckBetry() {
+func (g *Game) settleStageCheckBetry(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		if !player.UnionValidation() { // Here must some mistakes.
 			player.Ununion()
@@ -413,12 +498,31 @@ func (g *Game) settleStageCheckBetry() {
 				player.Target = nil
 				player.Unioned.Target = nil
 				player.Ununion() // Union broken.
+				(*gop) = append(*gop, globalOperation{
+					Player:    player,
+					Action:    Betray,
+					IsResult:  true,
+					EachOther: true,
+					BeBeast:   true,
+				})
 			} else { // I betrayed my union
 				if player.Target.TrapSet {
 					player.Kill(Trapped) // Oops! I was trapped!
 					player.User.KilledByTrapCount++
+					(*gop) = append(*gop, globalOperation{
+						Player:   player,
+						Action:   Betray,
+						BeKilled: true,
+						IsResult: true,
+					})
 				} else {
 					player.Target.Kill(Betrayed)
+					(*gop) = append(*gop, globalOperation{
+						Player:   player,
+						Action:   Betray,
+						Killed:   player.Target,
+						IsResult: true,
+					})
 					player.Target = nil
 				}
 			}
@@ -426,64 +530,125 @@ func (g *Game) settleStageCheckBetry() {
 	}
 }
 
-func (g *Game) settleStageCheckDeath() {
+func (g *Game) settleStageCheckDeath(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		if player.Target != nil && player.Target.Live { // I want to kill some one.
 			if player.Status >= PlayerStatusBeast { // I am a beast
 				if player.Target.Target == player { // Kill each other
 					if player.Target.Status >= PlayerStatusBeast { // That is a beast also...NO!!
+						PlayerShootSomethingHint <- player.Target //Will hint target that player dead
+						PlayerShootSomethingHint <- player        //Will hint player that target dead
 						player.Target.Kill(BeastKill)
 						player.Kill(BeastKill) // All dead.
+						(*gop) = append(*gop, globalOperation{
+							Player:    player,
+							Action:    Shoot,
+							EachOther: true,
+							Killed:    player.Target,
+							BeKilled:  true,
+							IsResult:  true,
+						})
 					} else { // I will kill that human!!
+						PlayerShootSomethingHint <- player
 						player.Target.Kill(EatenByBeast)
+						(*gop) = append(*gop, globalOperation{
+							Player:    player,
+							Action:    Shoot,
+							EachOther: true,
+							Killed:    player.Target,
+							IsResult:  true,
+						})
 					}
 				} else { // My target not kill me.
-					g.killPlayerNormal(player, EatenByBeast)
+					g.killPlayerNormal(player, EatenByBeast, gop)
 				}
 			} else { // I am not a beast
 				if player.Target.Target == player { // Kill each other
 					if player.Target.Status >= PlayerStatusBeast { // That is a beast...NO!
+						PlayerShootSomethingHint <- player.Target
 						player.Kill(EatenByBeast) // I am eaten by a beast.
+						(*gop) = append(*gop, globalOperation{
+							Player:    player,
+							Action:    Shoot,
+							EachOther: true,
+							BeKilled:  true,
+							IsResult:  true,
+						})
 					} else {
+						PlayerShootSomethingHint <- player        //Will hint target that player dead
+						PlayerShootSomethingHint <- player.Target //Will hint player that target dead
 						player.Kill(Shot)
 						player.Target.Kill(Shot) // All dead.
+						(*gop) = append(*gop, globalOperation{
+							Player:    player,
+							Action:    Shoot,
+							EachOther: true,
+							Killed:    player.Target,
+							BeKilled:  true,
+							IsResult:  true,
+						})
 					}
 				} else { // My target not kill me.
-					g.killPlayerNormal(player, Shot)
+					g.killPlayerNormal(player, Shot, gop)
 				}
 			}
 			player.User.ShootCount++
+		} else if player.Target != nil && !player.Target.Live {
+			(*gop) = append(*gop, globalOperation{
+				Player:   player,
+				Action:   Shoot,
+				IsResult: true,
+			})
 		}
 	}
 }
 
-func (g *Game) settleStageCheckTrap() {
+func (g *Game) settleStageCheckTrap(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		if player.TrapSet && player.Unioned != nil &&
 			((!player.Unioned.Live && player.Unioned.KilledReason != Trapped) ||
 				player.Unioned.Live) {
 			player.StatusChange(PlayerStatusBeast)
+			(*gop) = append(*gop, globalOperation{
+				Player:   player,
+				Action:   Trap,
+				BeBeast:  true,
+				IsResult: true,
+			})
 			player.Ununion()
 		}
 	}
 }
 
-func (g *Game) settleStageCheckUnion() {
+func (g *Game) settleStageCheckUnion(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		player.UnionCorrection()
 	}
 }
 
-func (g *Game) settleStageExposePosition() {
+func (g *Game) settleStageExposePosition(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		if !player.UnionValidation() && player.Live {
 			player.StatusChange()
+			(*gop) = append(*gop, globalOperation{
+				Player:   player,
+				Action:   Shoot,
+				BeBeast:  true,
+				IsResult: true,
+			})
 		}
 	}
 }
 
-func (g *Game) killPlayerNormal(player *Player, killedReason PlayerKilledReason) {
+func (g *Game) killPlayerNormal(player *Player, killedReason PlayerKilledReason, gop *[]globalOperation) {
+	PlayerShootSomethingHint <- player
 	player.Target.Kill(killedReason)
+	(*gop) = append(*gop, globalOperation{
+		Player:   player,
+		Action:   Shoot,
+		Killed:   player.Target,
+		IsResult: true,
+	})
 	if player.Target.Status == PlayerStatusNormal {
 		player.User.GuessKillCount++
 	} else if player.Target.Status == PlayerStatusXExposed {

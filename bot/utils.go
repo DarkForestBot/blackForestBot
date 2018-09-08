@@ -74,7 +74,7 @@ func makeUnionButtons(game *models.Game, exceptPlayer *models.Player) tgApi.Inli
 	return btns
 }
 
-func makeNightOperations(TgGroupID int64, player *models.Player, step int) tgApi.InlineKeyboardMarkup {
+func makeNightOperations(TgGroupID int64, player *models.Player, playerCount int, step int) tgApi.InlineKeyboardMarkup {
 	var btns tgApi.InlineKeyboardMarkup
 	btns.InlineKeyboard = make([][]tgApi.InlineKeyboardButton, 0)
 	if player.UnionValidation() {
@@ -98,7 +98,7 @@ func makeNightOperations(TgGroupID int64, player *models.Player, step int) tgApi
 		)
 	}
 	var br = make([]tgApi.InlineKeyboardButton, 0)
-	for i := 0; i < player.CurrentGamePlayersCount*2; i++ {
+	for i := 0; i < playerCount*2; i++ {
 		var data string
 		if step == 0 {
 			if i == player.Position.X {
@@ -117,8 +117,9 @@ func makeNightOperations(TgGroupID int64, player *models.Player, step int) tgApi
 			),
 		)
 	}
-	for i := 0; i < len(br); i += 5 {
-		if len(br)-i <= len(br)%2 {
+
+	for i := 0; i < len(br); i += 5 { // except myself.
+		if len(br)-i <= len(br)%5 {
 			btns.InlineKeyboard = append(
 				btns.InlineKeyboard,
 				br[i:],
@@ -126,7 +127,7 @@ func makeNightOperations(TgGroupID int64, player *models.Player, step int) tgApi
 		} else {
 			btns.InlineKeyboard = append(
 				btns.InlineKeyboard,
-				br[i:5],
+				br[i:i+5],
 			)
 		}
 	}
@@ -156,4 +157,63 @@ func (b *Bot) startGameClearMessage(game *models.Game) {
 		game.TgGroup.TgGroupID, game.MsgSent.StartMsg,
 		tgApi.InlineKeyboardMarkup{},
 	)
+}
+
+func (b *Bot) makeReplay(game *models.Game) error {
+	langSet := getLang(game.TgGroup.TgGroupID)
+	for i, ops := range game.GlobalOperations {
+		report := lang.T(langSet, "replay_round", i+1)
+		for _, op := range ops {
+			if op.IsResult {
+				var none = true
+				if op.Killed != nil {
+					none = false
+					if op.Action == models.Betray {
+						report += lang.T(langSet, "replay_betrayed", op)
+					} else {
+						report += lang.T(langSet, "replay_killed", op)
+					}
+				}
+				if op.BeKilled {
+					none = false
+					report += lang.T(langSet, "replay_bekilled", op)
+				}
+				if op.BeBeast {
+					none = false
+					report += lang.T(langSet, "replay_bebeast", op)
+				}
+				if op.Survive {
+					none = false
+					report += lang.T(langSet, "replay_survive", op)
+				}
+				if none {
+					report += lang.T(langSet, "replay_none", op)
+				}
+				if op.Finally {
+					if op.Player == nil {
+						report += lang.T(langSet, "replay_lose", nil)
+					} else {
+						report += lang.T(langSet, "replay_win", op)
+					}
+				}
+			} else {
+				switch op.Action {
+				case models.Shoot:
+					if op.Target != nil {
+						report += lang.T(langSet, "replay_shoot", op)
+					}
+				case models.Abort:
+					report += lang.T(langSet, "replay_abort", op)
+				case models.Trap:
+					report += lang.T(langSet, "replay_trap", op)
+				}
+				report += "\n"
+			}
+		}
+		msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+		if _, err := b.Send(msg); err != nil {
+			return err
+		}
+	}
+	return nil
 }

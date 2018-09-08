@@ -154,10 +154,17 @@ func btnShootTwo(arg string, act *tgApi.CallbackQuery) error {
 	if pos == nil {
 		return errors.New("Shoot outta map")
 	}
-	game.AttachOperation(player.Shoot(false, pos))
+
+	// shoot at union means betray.
+	var betray = false
+	if player.UnionValidation() && player.Unioned.Position == pos {
+		betray = true
+	}
+	operation := player.Shoot(betray, pos)
+	game.AttachOperation(operation)
 
 	models.ShootYHint <- player
-	OperationApprovedEvent <- act
+	models.ShootApprovedHint <- operation
 	return nil
 }
 
@@ -185,6 +192,7 @@ func btnUnionReq(arg string, act *tgApi.CallbackQuery) error {
 			srcPlayer.User.TgUserID, srcPlayer.UnionReq,
 			tgApi.InlineKeyboardMarkup{},
 		)
+		OperationApprovedEvent <- act
 		return nil
 	}
 

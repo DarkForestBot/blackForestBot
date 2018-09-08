@@ -2,7 +2,9 @@ package models
 
 import (
 	"fmt"
+	"log"
 
+	"git.wetofu.top/tonychee7000/blackForestBot/config"
 	"git.wetofu.top/tonychee7000/blackForestBot/database"
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -24,6 +26,9 @@ const (
 	AchivementUnionSuccess        // 10
 	AchivementBeUnioned           // 11
 )
+
+//UserAchivement is
+type UserAchivement map[string]int64
 
 // User is used in database
 type User struct {
@@ -63,7 +68,6 @@ type User struct {
 	//Wont record into database below
 	QueryMsg        *tgApi.Message `gorm:"-"`
 	TgGroupJoinGame *TgGroup       `gorm:"-"`
-	AchivementCode  int            `gorm:"-"`
 }
 
 //Update is
@@ -80,6 +84,9 @@ func (u *User) Stats(to *tgApi.Message) {
 //CheckAchivement is
 //every achivement has only 5 levels(0-4)
 func (u *User) CheckAchivement() {
+	if config.DefaultConfig.Debug {
+		log.Println("CheckAchivement called by ", u)
+	}
 	defer u.Update()
 	u.achivementCheck(&(u.GamesJoinedAchive), AchivementGamesJoined, u.GamesJoined, 10, 10, true)
 	u.achivementCheck(&(u.GamesWonAchive), AchivementGamesWon, u.GamesWon, 0, 5, false)
@@ -109,6 +116,10 @@ func (u *User) String() string {
 }
 
 func (u *User) achivementCheck(achivementLevel *int, achivement, count, base, times int, greaterOrEqual bool) {
+	if config.DefaultConfig.Debug {
+		log.Println(" -> achivementCheck called by", u.TgUserName, "AchivementCode=", achivement, "AchivementLevel=", *achivementLevel)
+	}
+
 	var cond bool
 	if base == 0 {
 		greaterOrEqual = false
@@ -119,8 +130,13 @@ func (u *User) achivementCheck(achivementLevel *int, achivement, count, base, ti
 		cond = count > achiveLevelToCount(base, times, *achivementLevel)
 	}
 	if cond && (*achivementLevel) < maxAchivementLevel {
-		u.AchivementCode = (*achivementLevel) + 10*achivement
-		AchivementRewardedHint <- u
+		if config.DefaultConfig.Debug {
+			log.Println(" -> -> Ready to send messages:", u.Name)
+		}
+		var userAchivement = make(UserAchivement)
+		userAchivement["userid"] = u.TgUserID
+		userAchivement["achivementcode"] = int64((*achivementLevel) + 10*achivement)
+		AchivementRewardedHint <- userAchivement
 		(*achivementLevel)++
 		u.AchiveRewardedCount++
 	}

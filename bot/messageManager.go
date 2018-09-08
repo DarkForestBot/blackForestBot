@@ -12,8 +12,14 @@ func (b *Bot) messageManager() {
 	log.Println("messageManager is running.")
 	for {
 		select {
-		case user := <-models.AchivementRewardedHint:
-			go b.onAchivementRewardedHint(user)
+		case operation := <-models.ShootApprovedHint:
+			go b.onShootApprovedHint(operation)
+		case player := <-models.PlayerShootNothingHint:
+			go b.onPlayerShootNothingHint(player)
+		case player := <-models.PlayerShootSomethingHint:
+			go b.onPlayerShootSomethingHint(player)
+		case userAchivement := <-models.AchivementRewardedHint:
+			go b.onAchivementRewardedHint(userAchivement)
 		case game := <-models.NewGameHint: // startmsg, playerlist, nextgameuerpm
 			go b.onNewGameHint(game)
 		case user := <-models.UserJoinHint:

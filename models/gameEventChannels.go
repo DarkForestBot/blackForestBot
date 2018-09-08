@@ -27,8 +27,11 @@ var (
 	UnionReqHint              chan []*Player //Player[0]: Src, Player[1]: Dst
 	UnionAcceptHint           chan []*Player
 	UnionRejectHint           chan []*Player
-	AchivementRewardedHint    chan *User
+	AchivementRewardedHint    chan UserAchivement
 	PlayerSurvivedAtNightHint chan *Player
+	PlayerShootNothingHint    chan *Player
+	PlayerShootSomethingHint  chan *Player
+	ShootApprovedHint         chan *Operation
 )
 
 func init() {
@@ -57,6 +60,9 @@ func init() {
 	UnionReqHint = make(chan []*Player, 1024)
 	UnionAcceptHint = make(chan []*Player, 1024)
 	UnionRejectHint = make(chan []*Player, 1024)
-	AchivementRewardedHint = make(chan *User, 1024)
+	AchivementRewardedHint = make(chan UserAchivement, 1024)
 	PlayerSurvivedAtNightHint = make(chan *Player, 1024)
+	PlayerShootNothingHint = make(chan *Player, 1024)
+	PlayerShootSomethingHint = make(chan *Player, 1024)
+	ShootApprovedHint = make(chan *Operation, 1024)
 }

@@ -6,7 +6,7 @@
 # "\n" is used as new line. "{{.Blah}}" will be replaced by program, please keep it as is.
 meta:language=English
 trans:test=Test
-trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from game \\[Group]\n/extend \\[time] Extend time of joining a game, extends 30s in default. \\[Group]\n/stats \\[someone] Show stats for player. \\[Group/PM]\n/forcestart Force start a game\\[Group]\n/players Show players who joined this game\\[Group]\n/nextgame A notification will be sent to you when a new game starts.\\[Group]\n\nRules:\n1. Every player receive a coordinate `(x, y)` as their position at the beginning of a game. Every player can shoot at a coordinate every night. You're dead if shot.\n2. Every shot exposes one of coordinate of your position(it is, your horizontal ordinate OR your vertical ordinate.).\n3. Player will be converted to a BEAST when his exact position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will have an even chance to live, die or become a BEAST. The BEAST will have half chance to die.\n5. Two players can unite each other without being noticed.\n6. Players who join a union would not expose his position when firing.\n7. Player can betray his union at night and kill his partner, no position is needed. The betrayer will turn into a BEAST.\n8. Player can setup a trap at night, killing who want to betray you. However, you would turn into BEAST if no one betrayed you.\n9. Only one player lives, or None lives.
+trans:help=*Dark Forest* Game help\n\nCommands:\n/startgame Start a game \\[Group]\n/setlang Set language \\[Group/PM]\n/flee Flee from game \\[Group]\n/extend \\[time] Extend time of joining a game, extends 30s in default. \\[Group]\n/stats \\[someone] Show stats for player. \\[Group/PM]\n/forcestart Force start a game\\[Group]\n/players Show players who joined this game\\[Group]\n/nextgame A notification will be sent to you when a new game starts.\\[Group]\n\nRules:\n1. Every player receive a coordinate `(x, y)` as their position at the beginning of a game. Every player can shoot at a coordinate every night. You're dead if shot.\n2. Every shot exposes one of coordinate of your position(it is, your horizontal ordinate OR your vertical ordinate. And everyone has unique horizontal ordinate and vertical ordinate.).\n3. Player will be converted to a BEAST when his exact position is exposed. When two players kill each other, BEAST will live.\n4. Player who abort action at night will have a chance to live, die or become a BEAST(1/2 live, 1/4 others). The BEAST will have even chance to die.\n5. Two players can unite each other without being noticed.\n6. Players who join a union would not expose his position when firing.\n7. Player can betray his union at night and kill his partner, no position is needed. The betrayer will turn into a BEAST.\n8. Player can setup a trap at night, killing who want to betray you. However, you would turn into BEAST if no one betrayed you.\n9. Only one player lives, or None lives.
 trans:about=About *Dark Forest*\n\nAuthor：[TonyChyi](https//t.me/tonychee7000)\nGIT: [BlackForestBot](https://git.wetofu.top/tonychee7000/blackForestBot)\nLICENCE: [GPLv3](https://www.gnu.org/licenses/gpl.txt)\nDonation: [https://bit.ly/2wUFesj](https://bit.ly/2wUFesj)
 trans:startgame=[{{.Name}}](tg://user?id={{.TgUserID}}) leaded everyone to a Dark Forst and started a chaos killing party. Now ONLY ONE can live!
 trans:join=Join
@@ -46,8 +46,9 @@ trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
 trans:operhint1=Now, it's your turn!\nChoose the position you want to shoot below as **x**, and then **y** by the comming message.\n(Abort: abort all operations this night, and god knows what will happen to you.)
 trans:operhint2=OK, now you can choose **y** ordinate of a position.
 trans:operapproved=Your operation is approved.
+trans:shootapproved=You are shooting at `({{.X}}, {{.Y}})`
 trans:skip=Skip
-trans:onday=It's day and every player can seek an union. Go ahead!\nYou have 120 seconds to take action.
+trans:onday=It's day and every player can seek an union. Go ahead!\nYou have 120 seconds to discuss or take action.
 trans:onnight=It's night and killing starts. Your choice means your FATE!\nYou have 60 seconds to take action.
 trans:betray=Betray
 trans:trap=Trap
@@ -68,7 +69,11 @@ trans:killed3=You were hit by a meteor...\n*Now You DEAD!*
 trans:killed4=A beast rushed to you when you were shooting at it...\n*Now You DEAD!*
 trans:killed5=You killed that beast, but you were suffering heavy wound...\n*Now You DEAD!*
 trans:abort=Abort
-trans:achivementrewarded=Congratulations, you have rewarded achivement *{{.}}*!
+trans:shootnothing=You wasted a bullet.
+trans:eatnothing=You eat air.
+trans:shootsomething=You see [{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) was hit by you.
+trans:eatsomething=[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) tastes so-so.
+trans:achivementrewarded=Congratulations, you are rewarded achivement *{{.}}*!
 
 # TODO: if any good idea, just go ahead.
 trans:achivement000=Game Join I
@@ -142,3 +147,18 @@ trans:achivement111=Be Unioned II
 trans:achivement112=Be Unioned III
 trans:achivement113=Be Unioned IV
 trans:achivement114=Be Unioned V
+
+trans:replay_round=#Replay Day {{.}}\n\n
+trans:replay_shoot=[{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) attacked position `({{.Target.X}}, {{.Target.Y}})`
+trans:replay_abort=[{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) let god judge their fate.
+trans:replay_trap=[{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) set a trap.
+
+trans:replay_betrayed=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) betrayed [{{.Killed.User.Name}}](tg://user?id={{.Killed.User.TgUserID}})\n
+trans:replay_killed=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) killed [{{.Killed.User.Name}}](tg://user?id={{.Killed.User.TgUserID}})\n
+trans:replay_bekilled=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) was killed\n
+trans:replay_bebeast=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) was beast\n
+trans:replay_survive=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) survived\n
+trans:replay_none=> [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) got nothing\n
+
+trans:replay_win=! [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) won the game
+trans:replay_lose=! All dead

@@ -13,15 +13,19 @@ import (
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (b *Bot) onAchivementRewardedHint(user *models.User) {
+func (b *Bot) onAchivementRewardedHint(userAchivement models.UserAchivement) {
 	threadLimitPool <- 1
 	defer releaseThreadPool()
-	langSet := getLang(user.TgUserID)
+	defer func() { recover() }()
+	if config.DefaultConfig.Debug {
+		log.Println("onAchivementRewardedHint user=", userAchivement["userid"], "code=", userAchivement["achivementcode"])
+	}
+	langSet := getLang(userAchivement["userid"])
 	_, err := b.MarkdownMessage(
-		user.TgUserID, langSet, "achivementrewarded",
+		userAchivement["userid"], langSet, "achivementrewarded",
 		lang.T(
 			langSet, fmt.Sprintf(
-				"achivement%03d", user.AchivementCode), nil),
+				"achivement%03d", userAchivement["achivementcode"]), nil),
 	)
 	if err != nil {
 		log.Println("ERROR:", err)
@@ -286,6 +290,17 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
+	// check any one can union?
+	var availList = make([]*models.Player, 0)
+	for _, player := range game.Players {
+		if player.Live && !player.UnionValidation() {
+			availList = append(availList, player)
+		}
+	}
+	if len(availList) == 0 {
+		return
+	}
+	// send msg
 	for _, player := range game.Players {
 		if player.Live && !player.UnionValidation() {
 			langSet = getLang(player.User.TgUserID)
@@ -327,7 +342,7 @@ func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 			}
 			msg, err := b.MarkdownMessage(
 				player.User.TgUserID, langSet, "operhint1", nil,
-				makeNightOperations(game.TgGroup.TgGroupID, player, 0),
+				makeNightOperations(game.TgGroup.TgGroupID, player, len(game.Players), 0),
 			)
 			if err != nil {
 				log.Println("ERROR:", err)
@@ -349,7 +364,9 @@ func (b *Bot) onShootXHint(player *models.Player) {
 		langSet := getLang(player.User.TgUserID)
 		msg, err := b.MarkdownMessage(
 			player.User.TgUserID, langSet, "operhint2", nil,
-			makeNightOperations(player.User.TgGroupJoinGame.TgGroupID, player, 1),
+			makeNightOperations(
+				player.User.TgGroupJoinGame.TgGroupID, player,
+				player.CurrentGamePlayersCount, 1),
 		)
 		if err != nil {
 			log.Println("ERROR:", err)
@@ -562,6 +579,9 @@ func (b *Bot) onGameLoseHint(game *models.Game) {
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
+	if err := b.makeReplay(game); err != nil {
+		log.Println("ERROR:", err)
+	}
 }
 
 func (b *Bot) onWinGameHint(game *models.Game) {
@@ -573,6 +593,9 @@ func (b *Bot) onWinGameHint(game *models.Game) {
 		game.TgGroup.TgGroupID, langSet, "win",
 		config.DefaultImages.Win, game.Winner.User,
 	); err != nil {
+		log.Println("ERROR:", err)
+	}
+	if err := b.makeReplay(game); err != nil {
 		log.Println("ERROR:", err)
 	}
 }
@@ -848,10 +871,58 @@ func (b *Bot) onOperationApprovedEvent(act *tgApi.CallbackQuery) {
 	}
 }
 
+func (b *Bot) onShootApprovedHint(operation *models.Operation) {
+	langSet := getLang(operation.Player.User.TgUserID)
+	if operation.Target == nil {
+		log.Println("ERROR: no target found.")
+		return
+	}
+	if _, err := b.MarkdownMessage(
+		operation.Player.User.TgUserID, langSet,
+		"shootapproved", operation.Target,
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
 func (b *Bot) onPlayerSurvivedAtNightHint(player *models.Player) {
 	langSet := getLang(player.User.TgUserID)
 	if _, err := b.MarkdownMessage(
 		player.User.TgUserID, langSet, "survive", nil,
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onPlayerShootNothingHint(player *models.Player) {
+	langSet := getLang(player.User.TgUserID)
+	var msgHint string
+	if player.Status >= models.PlayerStatusBeast {
+		msgHint = "eatnothing"
+	} else {
+		msgHint = "shootnothing"
+	}
+	if _, err := b.MarkdownMessage(
+		player.User.TgUserID, langSet, msgHint, nil,
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+}
+
+func (b *Bot) onPlayerShootSomethingHint(player *models.Player) {
+	langSet := getLang(player.User.TgUserID)
+	if player.Target == nil {
+		log.Println("ERROR: no target.")
+		return
+	}
+	var msgHint string
+	if player.Status >= models.PlayerStatusBeast {
+		msgHint = "eatsomething"
+	} else {
+		msgHint = "shootsomething"
+	}
+	if _, err := b.MarkdownMessage(
+		player.User.TgUserID, langSet, msgHint, player,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
