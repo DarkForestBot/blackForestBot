@@ -43,7 +43,7 @@ func newMsgSent() *msgSent {
 type globalOperation struct {
 	Player    Player
 	Action    PlayerAction
-	Target    Position // When result might nil
+	Target    *Position // When result might nil
 	IsResult  bool
 	EachOther bool
 
@@ -427,7 +427,7 @@ func (g *Game) settleStageTag(gop *[]globalOperation) {
 		(*gop) = append(*gop, globalOperation{
 			Player: *(operation.Player),
 			Action: operation.Action,
-			Target: *(operation.Target),
+			Target: operation.Target,
 		})
 		switch operation.Action {
 		case Shoot: // Betray is special shoot

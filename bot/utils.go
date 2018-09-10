@@ -161,12 +161,13 @@ func (b *Bot) startGameClearMessage(game *models.Game) {
 
 func (b *Bot) makeReplay(game *models.Game) error {
 	langSet := getLang(game.TgGroup.TgGroupID)
+	var report = "#Replay\n"
 	for i, ops := range game.GlobalOperations {
-		report := lang.T(langSet, "replay_round", i+1)
+		report += lang.T(langSet, "replay_round", i+1)
 		for _, op := range ops {
 			if op.IsResult {
 				var none = true
-				if op.Killed != nil {
+				if op.Killed != "" {
 					none = false
 					if op.Action == models.Betray {
 						report += lang.T(langSet, "replay_betrayed", op)
@@ -187,12 +188,12 @@ func (b *Bot) makeReplay(game *models.Game) error {
 					report += lang.T(langSet, "replay_survive", op)
 				}
 				if none {
-					if op.Player != nil {
+					if op.Player.User != nil {
 						report += lang.T(langSet, "replay_none", op)
 					}
 				}
 				if op.Finally {
-					if op.Player == nil {
+					if op.Player.User == nil {
 						report += lang.T(langSet, "replay_lose", nil)
 					} else {
 						report += lang.T(langSet, "replay_win", op)
@@ -212,11 +213,22 @@ func (b *Bot) makeReplay(game *models.Game) error {
 				report += "\n"
 			}
 		}
-		msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
-		msg.ParseMode = tgApi.ModeMarkdown
-		if _, err := b.Send(msg); err != nil {
-			return err
+
+		if len(report) > 2048 {
+			msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+			msg.ParseMode = tgApi.ModeMarkdown
+			if _, err := b.Send(msg); err != nil {
+				return err
+			}
+			report = "#Replay\n"
+		} else {
+			report += "--------\n"
 		}
+	}
+	msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+	msg.ParseMode = tgApi.ModeMarkdown
+	if _, err := b.Send(msg); err != nil {
+		return err
 	}
 	return nil
 }

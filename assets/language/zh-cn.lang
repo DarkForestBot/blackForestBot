@@ -147,7 +147,7 @@ trans:achivement112=还真是可爱啊
 trans:achivement113=就差个偶像见面会了
 trans:achivement114=万人迷
 
-trans:replay_round=#Replay 第 {{.}} 天\n\n
+trans:replay_round=第 {{.}} 天\n\n
 trans:replay_shoot={{.Player.User.Name}} 攻击了 `({{.Target.X}}, {{.Target.Y}})`
 trans:replay_abort={{.Player.User.Name}} 选择听天由命
 trans:replay_trap={{.Player.User.Name}} 设下了陷阱
