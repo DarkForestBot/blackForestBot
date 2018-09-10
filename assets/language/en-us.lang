@@ -56,7 +56,7 @@ trans:betray=Betray
 trans:trap=Trap
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) survived from this chaos game, but others...
 trans:lose=#Lose Oops! ALL dead.
-trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹Beast{{else}}🙂Human{{end}} \t {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
+trans:gameplayers=*Day {{.Round}}*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 3}}👹Beast{{else}}🙂Human{{end}} \t {{if .Live}}Survive{{else}}Dead{{end}}\n{{end}}
 trans:timeoutnight=Time out! You let dice decide your life!
 trans:timeoutday=It's sunset now. Stop finding your pal.
 trans:joinachat=Hello everyone, I am a bot running a game called `DarkForest` like PUBG.\n/help Show help.

@@ -55,7 +55,7 @@ trans:betray=背叛
 trans:trap=陷阱
 trans:win=#Win [{{.Name}}](tg://user?id={{.TgUserID}}) 活着走出了森林，然而其他人……
 trans:lose=#Lose 森林归于寂静，无人生还
-trans:gameplayers=*第 {{.Round}} 天*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 2}}👹野兽{{else}}🙂人类{{end}} \t {{if .Live}}幸存{{else}}死亡{{end}}\n{{end}}
+trans:gameplayers=*第 {{.Round}} 天*\n-----\n{{range .Players}}[{{.User.Name}}](tg://user?id={{.User.TgUserID}}) `{{.GetPositionString}}` {{if eq .Status 3}}👹野兽{{else}}🙂人类{{end}} \t {{if .Live}}幸存{{else}}死亡{{end}}\n{{end}}
 trans:timeoutnight=时间到！听天由命吧！
 trans:timeoutday=天黑了，请不要再找盟友了
 trans:joinachat=大家好，我是一个游戏 Bot，可以进行一个叫“暗黑森林”的类似大逃杀的游戏。\n/help 查看帮助信息
