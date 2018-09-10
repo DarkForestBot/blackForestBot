@@ -428,6 +428,7 @@ func (g *Game) settleStageTag() {
 			Player: operation.Player,
 			Action: operation.Action,
 			Target: operation.Target,
+			Result: make([]operationResult, 0),
 		})
 		g.GlobalOperations = append(g.GlobalOperations, operations)
 
