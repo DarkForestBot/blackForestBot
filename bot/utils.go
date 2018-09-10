@@ -187,7 +187,9 @@ func (b *Bot) makeReplay(game *models.Game) error {
 					report += lang.T(langSet, "replay_survive", op)
 				}
 				if none {
-					report += lang.T(langSet, "replay_none", op)
+					if op.Player != nil {
+						report += lang.T(langSet, "replay_none", op)
+					}
 				}
 				if op.Finally {
 					if op.Player == nil {
