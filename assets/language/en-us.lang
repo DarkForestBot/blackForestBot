@@ -155,8 +155,8 @@ trans:replay_shoot={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Pos
 trans:replay_abort={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` let god judge their fate.
 trans:replay_trap={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` set a trap.
 
-trans:replay_betrayed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` betrayed {{.Killed.User.Name}}\n
-trans:replay_killed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` killed {{.Killed.User.Name}}\n
+trans:replay_betrayed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` betrayed {{.Killed}}\n
+trans:replay_killed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` killed {{.Killed}}\n
 trans:replay_bekilled=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` was killed\n
 trans:replay_bebeast=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` was beast\n
 trans:replay_survive=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` survived\n
