@@ -193,6 +193,10 @@ func (g *Game) Start() error {
 
 //ForceStart is
 func (g *Game) ForceStart() error {
+	if g.Status != GameNotStart {
+		return nil
+	}
+
 	if err := g.Start(); err != nil {
 		NotEnoughPlayersHint <- g
 		return err
