@@ -915,9 +915,15 @@ func (b *Bot) onShootApprovedHint(operation *models.Operation) {
 		log.Println("ERROR: no target found.")
 		return
 	}
+	var msgHint string
+	if operation.Player.Status < models.PlayerStatusBeast {
+		msgHint = "shootapproved"
+	} else {
+		msgHint = "shootapproved_beast"
+	}
 	if _, err := b.MarkdownMessage(
 		operation.Player.User.TgUserID, langSet,
-		"shootapproved", operation.Target,
+		msgHint, operation.Target,
 	); err != nil {
 		log.Println("ERROR:", err)
 	}

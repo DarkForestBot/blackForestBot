@@ -48,6 +48,7 @@ trans:operhint1=Now, it's your turn!\nChoose the position you want to shoot belo
 trans:operhint2=OK, now you can choose **y** ordinate of a position.
 trans:operapproved=Your operation is approved.
 trans:shootapproved=You are shooting at `({{.X}}, {{.Y}})`
+trans:shootapproved_beast=You rushed to `({{.X}}, {{.Y}})`
 trans:skip=Skip
 trans:onday=It's day and every player can seek an union. Go ahead!\nYou have 120 seconds to discuss or take action.
 trans:onnight=It's night and killing starts. Your choice means your FATE!\nYou have 60 seconds to take action.

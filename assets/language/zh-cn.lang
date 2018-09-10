@@ -47,6 +47,7 @@ trans:operhint1=请选择你的操作\n数字是坐标的一个值，如果选�
 trans:operhint2=好的，现在你可以选择坐标的第二个值，完成开枪动作。
 trans:operapproved=操作已提交
 trans:shootapproved=你向 `({{.X}}, {{.Y}})` 开了一枪
+trans:shootapproved_beast=你向 `({{.X}}, {{.Y}})` 冲了过去
 trans:skip=跳过
 trans:onday=现在是白天，各位玩家可以选择另一位玩家结盟\n你有 120 秒的时间进行讨论或作出行动
 trans:onnight=现在是夜晚，最残酷的时刻来临了！各位玩家，做出你的决断吧！\n你有 60 秒的时间作出行动
