@@ -652,10 +652,12 @@ func (g *Game) settleStageCheckDeath() {
 			player.User.ShootCount++
 		} else if player.Target != nil && !player.Target.Live {
 			op := g.findGlobalOperation(g.Round, player)
-			op.AttachResult(operationResult{
-				Who:  player.Target,
-				None: true,
-			})
+			if op != nil {
+				op.AttachResult(operationResult{
+					Who:  player.Target,
+					None: true,
+				})
+			}
 		}
 	}
 }
@@ -715,7 +717,8 @@ func (g *Game) killPlayerNormal(player *Player, killedReason PlayerKilledReason)
 		}
 		if player.Target.Status == PlayerStatusNormal {
 			player.User.GuessKillCount++
-		} else if player.Target.Status == PlayerStatusXExposed {
+		} else if player.Target.Status == PlayerStatusXExposed ||
+			player.Target.Status == PlayerStatusYExposed {
 			player.User.SniperKillCount++
 		}
 		player.User.KillCount++
