@@ -151,16 +151,16 @@ trans:achivement113=Be Unioned IV
 trans:achivement114=Be Unioned V
 
 trans:replay_round=#Replay Day {{.}}\n\n
-trans:replay_shoot={{.Player.User.Name}} attacked position `({{.Target.X}}, {{.Target.Y}})`
-trans:replay_abort={{.Player.User.Name}} let god judge their fate.
-trans:replay_trap={{.Player.User.Name}} set a trap.
+trans:replay_shoot={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` attacked position `({{.Target.X}}, {{.Target.Y}})`
+trans:replay_abort={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` let god judge their fate.
+trans:replay_trap={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` set a trap.
 
-trans:replay_betrayed=> {{.Player.User.Name}} betrayed {{.Killed.User.Name}}\n
-trans:replay_killed=> {{.Player.User.Name}} killed {{.Killed.User.Name}}\n
-trans:replay_bekilled=> {{.Player.User.Name}} was killed\n
-trans:replay_bebeast=> {{.Player.User.Name}} was beast\n
-trans:replay_survive=> {{.Player.User.Name}} survived\n
-trans:replay_none=> {{.Player.User.Name}} got nothing\n
+trans:replay_betrayed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` betrayed {{.Killed.User.Name}}\n
+trans:replay_killed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` killed {{.Killed.User.Name}}\n
+trans:replay_bekilled=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` was killed\n
+trans:replay_bebeast=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` was beast\n
+trans:replay_survive=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` survived\n
+trans:replay_none=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` got nothing\n
 
 trans:replay_win=! [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) won the game
 trans:replay_lose=! All dead

@@ -149,16 +149,16 @@ trans:achivement113=就差个偶像见面会了
 trans:achivement114=万人迷
 
 trans:replay_round=第 {{.}} 天\n\n
-trans:replay_shoot={{.Player.User.Name}} 攻击了 `({{.Target.X}}, {{.Target.Y}})`
-trans:replay_abort={{.Player.User.Name}} 选择听天由命
-trans:replay_trap={{.Player.User.Name}} 设下了陷阱
+trans:replay_shoot={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` 攻击了 `({{.Target.X}}, {{.Target.Y}})`
+trans:replay_abort={{.Player.User.Name}} `({{.Player.Position.X}}, {{.Player.Position.Y}})` 选择听天由命
+trans:replay_trap={{.Player.User.Name}}  `({{.Player.Position.X}}, {{.Player.Position.Y}})` 设下了陷阱
 
-trans:replay_betrayed=> {{.Player.User.Name}} 背叛了 {{.Killed}}\n
-trans:replay_killed=> {{.Player.User.Name}} 杀死了 {{.Killed}}\n
-trans:replay_bekilled=> {{.Player.User.Name}} 被杀\n
-trans:replay_bebeast=> {{.Player.User.Name}} 变成了野兽\n
-trans:replay_survive=> {{.Player.User.Name}} 老天不收\n
-trans:replay_none=> {{.Player.User.Name}} 一无所获\n
+trans:replay_betrayed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 背叛了 {{.Killed}}\n
+trans:replay_killed=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 杀死了 {{.Killed}}\n
+trans:replay_bekilled=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 被杀\n
+trans:replay_bebeast=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 变成了野兽\n
+trans:replay_survive=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 老天不收\n
+trans:replay_none=> {{.Who.User.Name}} `({{.Who.Position.X}}, {{.Who.Position.Y}})` 一无所获\n
 
 trans:replay_win=! [{{.Player.User.Name}}](tg://user?id={{.Player.User.TgUserID}}) 获胜
 trans:replay_lose=! 无人生还

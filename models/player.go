@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	tgApi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -14,7 +16,7 @@ const (
 	PlayerStatusNormal     = 0
 	PlayerStatusXExposed   = 1
 	PlayerStatusYExposed   = 2
-	PlayerStatusBeast      = PlayerStatusYExposed
+	PlayerStatusBeast      = 3
 	PlayerSetTrap          = true
 	PlayerUnsetTrap        = false
 	PlayerUnionBetrayed    = true
@@ -172,7 +174,19 @@ func (p *Player) StatusChange(stage ...int) {
 	if stage != nil && len(stage) > 0 {
 		p.Status = stage[0]
 	} else {
-		p.Status++
+		switch p.Status {
+		case PlayerStatusNormal:
+			rand.Seed(time.Now().Unix())
+			if rand.Intn(2) == 0 {
+				p.Status = PlayerStatusXExposed
+			} else {
+				p.Status = PlayerStatusYExposed
+			}
+		case PlayerStatusXExposed:
+			fallthrough
+		case PlayerStatusYExposed:
+			p.Status = PlayerStatusBeast
+		}
 	}
 	if p.Status >= PlayerStatusBeast {
 		p.Status = PlayerStatusBeast
@@ -190,6 +204,8 @@ func (p *Player) GetPositionString() string {
 		return "(?, ?)"
 	case PlayerStatusXExposed:
 		return fmt.Sprintf("(%d, ?)", p.Position.X)
+	case PlayerStatusYExposed:
+		return fmt.Sprintf("(?, %d)", p.Position.Y)
 	case PlayerStatusBeast:
 		return fmt.Sprintf("(%d, %d)", p.Position.X, p.Position.Y)
 	}

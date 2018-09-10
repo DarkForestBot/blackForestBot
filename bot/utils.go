@@ -163,55 +163,89 @@ func (b *Bot) makeReplay(game *models.Game) error {
 	langSet := getLang(game.TgGroup.TgGroupID)
 	var report = "#Replay\n"
 	for i, ops := range game.GlobalOperations {
+		var finish = false
 		report += lang.T(langSet, "replay_round", i+1)
 		for _, op := range ops {
-			if op.IsResult {
-				var none = true
-				if op.Killed != "" {
-					none = false
+			/*
+				if op.IsResult {
+					var none = true
+					if op.Killed != "" {
+						none = false
+						if op.Action == models.Betray {
+							report += lang.T(langSet, "replay_betrayed", op)
+						} else {
+							report += lang.T(langSet, "replay_killed", op)
+						}
+					}
+					if op.BeKilled {
+						none = false
+						report += lang.T(langSet, "replay_bekilled", op)
+					}
+					if op.BeBeast {
+						none = false
+						report += lang.T(langSet, "replay_bebeast", op)
+					}
+					if op.Survive {
+						none = false
+						report += lang.T(langSet, "replay_survive", op)
+					}
+					if none {
+						if op.Player.User != nil {
+							report += lang.T(langSet, "replay_none", op)
+						}
+					}
+
+				} else {*/
+			if op.Finally {
+				report += "\n"
+				if op.Player.User == nil {
+					report += lang.T(langSet, "replay_lose", nil)
+				} else {
+					report += lang.T(langSet, "replay_win", op)
+				}
+				report += "\n"
+				finish = true
+				break
+			}
+
+			switch op.Action {
+			case models.Shoot:
+				if op.Target != nil {
+					report += lang.T(langSet, "replay_shoot", op)
+				}
+			case models.Abort:
+				report += lang.T(langSet, "replay_abort", op)
+			case models.Trap:
+				report += lang.T(langSet, "replay_trap", op)
+			}
+			for _, r := range op.Result {
+				if r.Killed != "" {
 					if op.Action == models.Betray {
-						report += lang.T(langSet, "replay_betrayed", op)
+						report += lang.T(langSet, "replay_betrayed", r)
 					} else {
-						report += lang.T(langSet, "replay_killed", op)
+						report += lang.T(langSet, "replay_killed", r)
 					}
 				}
-				if op.BeKilled {
-					none = false
-					report += lang.T(langSet, "replay_bekilled", op)
+				if r.BeKilled {
+					report += lang.T(langSet, "replay_bekilled", r)
 				}
-				if op.BeBeast {
-					none = false
-					report += lang.T(langSet, "replay_bebeast", op)
+				if r.BeBeast {
+					report += lang.T(langSet, "replay_bebeast", r)
 				}
-				if op.Survive {
-					none = false
-					report += lang.T(langSet, "replay_survive", op)
+				if r.Survive {
+					report += lang.T(langSet, "replay_survive", r)
 				}
-				if none {
-					if op.Player.User != nil {
+				if r.None {
+					if r.Who != nil {
 						report += lang.T(langSet, "replay_none", op)
 					}
 				}
-				if op.Finally {
-					if op.Player.User == nil {
-						report += lang.T(langSet, "replay_lose", nil)
-					} else {
-						report += lang.T(langSet, "replay_win", op)
-					}
-				}
-			} else {
-				switch op.Action {
-				case models.Shoot:
-					if op.Target != nil {
-						report += lang.T(langSet, "replay_shoot", op)
-					}
-				case models.Abort:
-					report += lang.T(langSet, "replay_abort", op)
-				case models.Trap:
-					report += lang.T(langSet, "replay_trap", op)
-				}
-				report += "\n"
 			}
+			report += "\n"
+		}
+
+		if finish {
+			break
 		}
 
 		if len(report) > 2048 {
