@@ -56,6 +56,8 @@ func (b *Bot) messageManager() {
 			go b.onUnionAcceptHint(players)
 		case players := <-models.UnionRejectHint:
 			go b.onUnionRejectHint(players)
+		case players := <-models.UnionHasOneHint:
+			go b.onUnionHasOneHint(players)
 		case game := <-models.GameLoseHint:
 			go b.onGameLoseHint(game)
 		case game := <-models.WinGameHint:

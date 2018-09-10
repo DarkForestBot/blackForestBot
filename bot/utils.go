@@ -211,6 +211,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 			}
 		}
 		msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+		msg.ParseMode = tgApi.ModeMarkdown
 		if _, err := b.Send(msg); err != nil {
 			return err
 		}

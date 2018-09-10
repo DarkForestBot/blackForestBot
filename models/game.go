@@ -404,11 +404,11 @@ func (g *Game) settle() {
 	g.settleStageExposePosition(&operations)
 	// Stage O: Reset some status
 	for _, player := range g.Players {
-		g.GlobalOperations = append(g.GlobalOperations, operations)
-		g.Operations = make([]*Operation, 0)
 		player.ActionClear()
 		player.User.Update()
 	}
+	g.Operations = make([]*Operation, 0)
+	g.GlobalOperations = append(g.GlobalOperations, operations)
 }
 
 func (g *Game) settleStageTag(gop *[]globalOperation) {
@@ -436,21 +436,25 @@ func (g *Game) settleStageTag(gop *[]globalOperation) {
 			if operation.Player.Status < PlayerStatusBeast {
 				fate := rand.Intn(4) // 1/n rate
 				if fate == 0 {
+					if operation.Player.Status < PlayerStatusBeast {
+						(*gop) = append(*gop, globalOperation{
+							Player:   operation.Player,
+							Action:   operation.Action,
+							BeBeast:  true,
+							IsResult: true,
+						})
+					}
 					operation.Player.StatusChange(PlayerStatusBeast)
-					(*gop) = append(*gop, globalOperation{
-						Player:   operation.Player,
-						Action:   operation.Action,
-						BeBeast:  true,
-						IsResult: true,
-					})
 				} else if fate == 1 {
+					if operation.Player.Live {
+						(*gop) = append(*gop, globalOperation{
+							Player:   operation.Player,
+							Action:   operation.Action,
+							BeKilled: true,
+							IsResult: true,
+						})
+					}
 					operation.Player.Kill(Flee)
-					(*gop) = append(*gop, globalOperation{
-						Player:   operation.Player,
-						Action:   operation.Action,
-						BeKilled: true,
-						IsResult: true,
-					})
 				} else {
 					PlayerSurvivedAtNightHint <- operation.Player
 					(*gop) = append(*gop, globalOperation{
@@ -462,13 +466,15 @@ func (g *Game) settleStageTag(gop *[]globalOperation) {
 				}
 			} else {
 				if rand.Intn(3) == 0 { // 1/n
+					if operation.Player.Live {
+						(*gop) = append(*gop, globalOperation{
+							Player:   operation.Player,
+							Action:   operation.Action,
+							BeKilled: true,
+							IsResult: true,
+						})
+					}
 					operation.Player.Kill(Flee)
-					(*gop) = append(*gop, globalOperation{
-						Player:   operation.Player,
-						Action:   operation.Action,
-						BeKilled: true,
-						IsResult: true,
-					})
 				} else {
 					PlayerSurvivedAtNightHint <- operation.Player
 					(*gop) = append(*gop, globalOperation{
@@ -493,36 +499,51 @@ func (g *Game) settleStageCheckBetry(gop *[]globalOperation) {
 			player.User.BetrayCount++
 			if player.Unioned.Target == player { // Betray each other
 				player.Unioned.User.BetrayCount++
+				if player.Status < PlayerStatusBeast {
+					(*gop) = append(*gop, globalOperation{
+						Player:    player,
+						Action:    Betray,
+						IsResult:  true,
+						EachOther: true,
+						BeBeast:   true,
+					})
+				}
 				player.StatusChange(PlayerStatusBeast)
+				if player.Unioned.Status < PlayerStatusBeast {
+					(*gop) = append(*gop, globalOperation{
+						Player:    player.Unioned,
+						Action:    Betray,
+						IsResult:  true,
+						EachOther: true,
+						BeBeast:   true,
+					})
+				}
 				player.Unioned.StatusChange(PlayerStatusBeast)
 				player.Target = nil
 				player.Unioned.Target = nil
 				player.Ununion() // Union broken.
-				(*gop) = append(*gop, globalOperation{
-					Player:    player,
-					Action:    Betray,
-					IsResult:  true,
-					EachOther: true,
-					BeBeast:   true,
-				})
 			} else { // I betrayed my union
 				if player.Target.TrapSet {
+					if player.Live {
+						(*gop) = append(*gop, globalOperation{
+							Player:   player,
+							Action:   Betray,
+							BeKilled: true,
+							IsResult: true,
+						})
+					}
 					player.Kill(Trapped) // Oops! I was trapped!
 					player.User.KilledByTrapCount++
-					(*gop) = append(*gop, globalOperation{
-						Player:   player,
-						Action:   Betray,
-						BeKilled: true,
-						IsResult: true,
-					})
 				} else {
+					if player.Target.Live {
+						(*gop) = append(*gop, globalOperation{
+							Player:   player,
+							Action:   Betray,
+							Killed:   player.Target,
+							IsResult: true,
+						})
+					}
 					player.Target.Kill(Betrayed)
-					(*gop) = append(*gop, globalOperation{
-						Player:   player,
-						Action:   Betray,
-						Killed:   player.Target,
-						IsResult: true,
-					})
 					player.Target = nil
 				}
 			}
@@ -538,26 +559,30 @@ func (g *Game) settleStageCheckDeath(gop *[]globalOperation) {
 					if player.Target.Status >= PlayerStatusBeast { // That is a beast also...NO!!
 						PlayerShootSomethingHint <- player.Target //Will hint target that player dead
 						PlayerShootSomethingHint <- player        //Will hint player that target dead
+						if player.Target.Live && player.Live {
+							(*gop) = append(*gop, globalOperation{
+								Player:    player,
+								Action:    Shoot,
+								EachOther: true,
+								Killed:    player.Target,
+								BeKilled:  true,
+								IsResult:  true,
+							})
+						}
 						player.Target.Kill(BeastKill)
 						player.Kill(BeastKill) // All dead.
-						(*gop) = append(*gop, globalOperation{
-							Player:    player,
-							Action:    Shoot,
-							EachOther: true,
-							Killed:    player.Target,
-							BeKilled:  true,
-							IsResult:  true,
-						})
 					} else { // I will kill that human!!
 						PlayerShootSomethingHint <- player
+						if player.Target.Live {
+							(*gop) = append(*gop, globalOperation{
+								Player:    player,
+								Action:    Shoot,
+								EachOther: true,
+								Killed:    player.Target,
+								IsResult:  true,
+							})
+						}
 						player.Target.Kill(EatenByBeast)
-						(*gop) = append(*gop, globalOperation{
-							Player:    player,
-							Action:    Shoot,
-							EachOther: true,
-							Killed:    player.Target,
-							IsResult:  true,
-						})
 					}
 				} else { // My target not kill me.
 					g.killPlayerNormal(player, EatenByBeast, gop)
@@ -566,27 +591,31 @@ func (g *Game) settleStageCheckDeath(gop *[]globalOperation) {
 				if player.Target.Target == player { // Kill each other
 					if player.Target.Status >= PlayerStatusBeast { // That is a beast...NO!
 						PlayerShootSomethingHint <- player.Target
+						if player.Live {
+							(*gop) = append(*gop, globalOperation{
+								Player:    player,
+								Action:    Shoot,
+								EachOther: true,
+								BeKilled:  true,
+								IsResult:  true,
+							})
+						}
 						player.Kill(EatenByBeast) // I am eaten by a beast.
-						(*gop) = append(*gop, globalOperation{
-							Player:    player,
-							Action:    Shoot,
-							EachOther: true,
-							BeKilled:  true,
-							IsResult:  true,
-						})
 					} else {
 						PlayerShootSomethingHint <- player        //Will hint target that player dead
 						PlayerShootSomethingHint <- player.Target //Will hint player that target dead
+						if player.Live && player.Target.Live {
+							(*gop) = append(*gop, globalOperation{
+								Player:    player,
+								Action:    Shoot,
+								EachOther: true,
+								Killed:    player.Target,
+								BeKilled:  true,
+								IsResult:  true,
+							})
+						}
 						player.Kill(Shot)
 						player.Target.Kill(Shot) // All dead.
-						(*gop) = append(*gop, globalOperation{
-							Player:    player,
-							Action:    Shoot,
-							EachOther: true,
-							Killed:    player.Target,
-							BeKilled:  true,
-							IsResult:  true,
-						})
 					}
 				} else { // My target not kill me.
 					g.killPlayerNormal(player, Shot, gop)
@@ -608,13 +637,15 @@ func (g *Game) settleStageCheckTrap(gop *[]globalOperation) {
 		if player.TrapSet && player.Unioned != nil &&
 			((!player.Unioned.Live && player.Unioned.KilledReason != Trapped) ||
 				player.Unioned.Live) {
+			if player.Status < PlayerStatusBeast {
+				(*gop) = append(*gop, globalOperation{
+					Player:   player,
+					Action:   Trap,
+					BeBeast:  true,
+					IsResult: true,
+				})
+			}
 			player.StatusChange(PlayerStatusBeast)
-			(*gop) = append(*gop, globalOperation{
-				Player:   player,
-				Action:   Trap,
-				BeBeast:  true,
-				IsResult: true,
-			})
 			player.Ununion()
 		}
 	}
@@ -629,32 +660,36 @@ func (g *Game) settleStageCheckUnion(gop *[]globalOperation) {
 func (g *Game) settleStageExposePosition(gop *[]globalOperation) {
 	for _, player := range g.Players {
 		if !player.UnionValidation() && player.Live {
+			if player.Status == PlayerStatusXExposed {
+				(*gop) = append(*gop, globalOperation{
+					Player:   player,
+					Action:   Shoot,
+					BeBeast:  true,
+					IsResult: true,
+				})
+			}
 			player.StatusChange()
-			(*gop) = append(*gop, globalOperation{
-				Player:   player,
-				Action:   Shoot,
-				BeBeast:  true,
-				IsResult: true,
-			})
 		}
 	}
 }
 
 func (g *Game) killPlayerNormal(player *Player, killedReason PlayerKilledReason, gop *[]globalOperation) {
 	PlayerShootSomethingHint <- player
-	player.Target.Kill(killedReason)
-	(*gop) = append(*gop, globalOperation{
-		Player:   player,
-		Action:   Shoot,
-		Killed:   player.Target,
-		IsResult: true,
-	})
-	if player.Target.Status == PlayerStatusNormal {
-		player.User.GuessKillCount++
-	} else if player.Target.Status == PlayerStatusXExposed {
-		player.User.SniperKillCount++
+	if player.Target.Live {
+		(*gop) = append(*gop, globalOperation{
+			Player:   player,
+			Action:   Shoot,
+			Killed:   player.Target,
+			IsResult: true,
+		})
+		if player.Target.Status == PlayerStatusNormal {
+			player.User.GuessKillCount++
+		} else if player.Target.Status == PlayerStatusXExposed {
+			player.User.SniperKillCount++
+		}
+		player.User.KillCount++
 	}
-	player.User.KillCount++
+	player.Target.Kill(killedReason)
 }
 
 func (g *Game) findAbort() []*Player {

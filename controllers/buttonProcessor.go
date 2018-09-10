@@ -273,6 +273,10 @@ func btnUnionAccept(arg string, act *tgApi.CallbackQuery) error {
 	var lock sync.RWMutex
 	lock.Lock()
 	defer lock.Unlock()
+	if targetPlayer.UnionValidation() && targetPlayer.Unioned == srcPlayer {
+		models.UnionHasOneHint <- []*models.Player{srcPlayer, targetPlayer}
+		return nil
+	}
 	if !targetPlayer.UnionValidation() {
 		targetPlayer.Union(srcPlayer)
 		models.UnionAcceptHint <- []*models.Player{srcPlayer, targetPlayer}
