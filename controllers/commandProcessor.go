@@ -48,8 +48,14 @@ func OnJoinAChat(msg *tgApi.Message) error {
 		return errors.New("Bad tg group")
 	}
 
-	user, err := models.GetUser(int64(msg.From.ID))
-	if err != nil {
+	// Auto register.
+	user := new(models.User)
+	if err := database.DB.Where(models.User{TgUserID: int64(msg.From.ID)}).Assign(
+		models.User{
+			TgUserName: msg.From.UserName,
+			Name:       fmt.Sprintf("%s %s", msg.From.FirstName, msg.From.LastName),
+		},
+	).FirstOrCreate(user).Error; err != nil {
 		return err
 	}
 

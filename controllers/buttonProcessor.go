@@ -46,8 +46,6 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		if err := group.Update(); err != nil {
 			return err
 		}
-		lang.UserLang[act.Message.Chat.ID] = arg
-
 	} else if act.Message.Chat.ID > 0 {
 		user, err := models.GetUser(int64(act.Message.Chat.ID))
 		if err != nil {
@@ -57,8 +55,8 @@ func btnSetLang(arg string, act *tgApi.CallbackQuery) error {
 		if err := user.Update(); err != nil {
 			return err
 		}
-		lang.UserLang[act.Message.Chat.ID] = arg
 	}
+	lang.UserLang[act.Message.Chat.ID] = arg
 	DeleteMessageEvent <- tgApi.DeleteMessageConfig{
 		ChatID:    act.Message.Chat.ID,
 		MessageID: act.Message.MessageID,
