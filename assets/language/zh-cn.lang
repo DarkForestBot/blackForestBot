@@ -71,7 +71,7 @@ trans:killed5=你杀死了对方，但也伤势过重，你倒下了……\n*你
 trans:abort=听天由命
 trans:shootnothing=你浪费了一发子弹，还引起了其他人的警觉。
 trans:eatnothing=你莽撞地冲了过去，失落而归。
-trans:shootsomething=你清楚的看见[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) 倒在了哪里，你的枪下鬼又多了一个人。
+trans:shootsomething=你清楚的看见[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) 倒在了那里，你的枪下鬼又多了一个人。
 trans:eatsomething=[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) 的肉，似乎没有想像中的那么好吃
 trans:achivementrewarded=恭喜你解锁成就：*{{.}}*!
 
