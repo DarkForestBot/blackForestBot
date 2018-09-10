@@ -430,8 +430,9 @@ func (g *Game) settleStageTag() {
 			Target: operation.Target,
 			Result: make([]operationResult, 0),
 		})
-		g.GlobalOperations = append(g.GlobalOperations, operations)
-
+	}
+	g.GlobalOperations = append(g.GlobalOperations, operations)
+	for _, operation := range g.Operations {
 		switch operation.Action {
 		case Shoot: // Betray is special shoot
 			if operation.Target != nil && operation.Target.Player != nil {
