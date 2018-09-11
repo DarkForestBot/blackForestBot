@@ -20,7 +20,7 @@ trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id
 trans:gamecancelled=Players not enough, game cancelled.
 trans:gamestart=Game start!
 trans:jointime={{.}} Left! Be quick!
-trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) has joined this game.
+trans:joingame={{.Name}} has joined this game.
 trans:joinsuccess=You have joined the game in {{.Name}}.
 trans:onplayers=Here is the players joined.
 trans:getposition=Your position is `({{.Position.X}}, {{.Position.Y}})`\n*DO NOT TELL OTHERS!*

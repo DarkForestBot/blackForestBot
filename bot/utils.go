@@ -166,39 +166,12 @@ func (b *Bot) makeReplay(game *models.Game) error {
 		var finish = false
 		report += lang.T(langSet, "replay_round", i+1)
 		for _, op := range ops {
-			/*
-				if op.IsResult {
-					var none = true
-					if op.Killed != "" {
-						none = false
-						if op.Action == models.Betray {
-							report += lang.T(langSet, "replay_betrayed", op)
-						} else {
-							report += lang.T(langSet, "replay_killed", op)
-						}
-					}
-					if op.BeKilled {
-						none = false
-						report += lang.T(langSet, "replay_bekilled", op)
-					}
-					if op.BeBeast {
-						none = false
-						report += lang.T(langSet, "replay_bebeast", op)
-					}
-					if op.Survive {
-						none = false
-						report += lang.T(langSet, "replay_survive", op)
-					}
-					if none {
-						if op.Player.User != nil {
-							report += lang.T(langSet, "replay_none", op)
-						}
-					}
-
-				} else {*/
+			if op == nil {
+				continue
+			}
 			if op.Finally {
 				report += "\n"
-				if op.Player.User == nil {
+				if op.Player == nil {
 					report += lang.T(langSet, "replay_lose", nil)
 				} else {
 					report += lang.T(langSet, "replay_win", op)

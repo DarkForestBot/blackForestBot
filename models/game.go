@@ -40,23 +40,6 @@ func newMsgSent() *msgSent {
 	return m
 }
 
-/*type globalOperation struct {
-	Player    Player
-	Action    PlayerAction
-	Target    *Position // When result might nil
-	IsResult  bool
-	EachOther bool
-
-	//Result
-	Killed   string
-	BeKilled bool
-	BeBeast  bool
-	Survive  bool // for Abort
-	None     bool
-
-	Finally bool
-}*/
-
 //Game is
 type Game struct {
 	Round            int
@@ -70,7 +53,7 @@ type Game struct {
 	TimeLeft         int
 	MsgSent          *msgSent
 	Operations       []*Operation // Every round will clear
-	GlobalOperations [][]globalOperation
+	GlobalOperations [][]*globalOperation
 	Cron             *cron.Cron
 	Winner           *Player
 }
@@ -356,7 +339,7 @@ func (g *Game) winloseCheck() bool {
 	if len(pl) == 0 { // All Dead
 		g.GlobalOperations[len(g.GlobalOperations)-1] = append(
 			g.GlobalOperations[len(g.GlobalOperations)-1],
-			globalOperation{
+			&globalOperation{
 				Round:   g.Round,
 				Finally: true,
 			},
@@ -370,7 +353,7 @@ func (g *Game) winloseCheck() bool {
 		WinGameHint <- g
 		g.GlobalOperations[len(g.GlobalOperations)-1] = append(
 			g.GlobalOperations[len(g.GlobalOperations)-1],
-			globalOperation{
+			&globalOperation{
 				Round:   g.Round,
 				Player:  g.Winner,
 				Finally: true,
@@ -421,9 +404,9 @@ func (g *Game) settle() {
 }
 
 func (g *Game) settleStageTag() {
-	var operations = make([]globalOperation, 0)
+	var operations = make([]*globalOperation, 0)
 	for _, operation := range g.Operations {
-		operations = append(operations, globalOperation{
+		operations = append(operations, &globalOperation{
 			Round:  g.Round,
 			Player: operation.Player,
 			Action: operation.Action,
@@ -826,7 +809,7 @@ func (g *Game) findGlobalOperation(round int, player *Player) *globalOperation {
 	defer func() { recover() }()
 	for _, op := range g.GlobalOperations[round-1] {
 		if op.Player == player {
-			return &op
+			return op
 		}
 	}
 	return nil

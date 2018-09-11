@@ -19,7 +19,7 @@ trans:players=#Players: {{len .Users}}\n{{range .Users}}[{{.Name}}](tg://user?id
 trans:gamecancelled=人数不足6人，游戏取消
 trans:gamestart=游戏开始！
 trans:jointime=游戏还有 {{.}} 可以加入，要快！
-trans:joingame=[{{.Name}}](tg://user?id={{.TgUserID}}) 加入了游戏
+trans:joingame={{.Name}} 加入了游戏
 trans:joinsuccess=你已成功加入到 {{.Name}} 的游戏中
 trans:onplayers=这里是玩家名单
 trans:getposition=你的坐标是 `({{.Position.X}}, {{.Position.Y}})`\n*不要告诉其他人！*
