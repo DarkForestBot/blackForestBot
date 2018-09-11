@@ -239,7 +239,12 @@ func onExtend(msg *tgApi.Message, args ...string) error {
 
 	game, ok := gameList[msg.Chat.ID]
 	if ok && game != nil {
-		game.Extend(eta)
+		for _, user := range game.Users {
+			if user.TgUserID == int64(msg.From.ID) {
+				game.Extend(eta)
+				break
+			}
+		}
 	} else {
 		NoGameEvent <- msg
 	}
