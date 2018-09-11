@@ -44,6 +44,7 @@ trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) has accepted your req
 trans:unionfailed=Union failed
 trans:unionhasone=You have already teamed up with [{{.Name}}](tg://user?id={{.TgUserID}})
 trans:unionreqsent=Request for [{{.Name}}](tg://user?id={{.TgUserID}}) sent.
+trans:unioninvalid=You were drunk today, no union valid.
 trans:operhint1=Now, it's your turn!\nChoose the position you want to shoot below as **x**, and then **y** by the comming message.\n(Abort: abort all operations this night, and god knows what will happen to you.)
 trans:operhint2=OK, now you can choose **y** ordinate of a position.
 trans:operapproved=Your operation is approved.

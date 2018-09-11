@@ -28,6 +28,7 @@ var (
 	UnionAcceptHint           chan []*Player
 	UnionRejectHint           chan []*Player
 	UnionHasOneHint           chan []*Player
+	UnionInvalidHint          chan *Player
 	AchivementRewardedHint    chan UserAchivement
 	PlayerSurvivedAtNightHint chan *Player
 	PlayerShootNothingHint    chan *Player
@@ -62,6 +63,7 @@ func init() {
 	UnionAcceptHint = make(chan []*Player, 1024)
 	UnionRejectHint = make(chan []*Player, 1024)
 	UnionHasOneHint = make(chan []*Player, 1024)
+	UnionInvalidHint = make(chan *Player, 1024)
 	AchivementRewardedHint = make(chan UserAchivement, 1024)
 	PlayerSurvivedAtNightHint = make(chan *Player, 1024)
 	PlayerShootNothingHint = make(chan *Player, 1024)

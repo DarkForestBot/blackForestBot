@@ -980,3 +980,12 @@ func (b *Bot) onPlayerShootSomethingHint(player *models.Player) {
 		log.Println("ERROR:", err)
 	}
 }
+
+func (b *Bot) onUnionInvalidHint(player *models.Player) {
+	langSet := getLang(player.User.TgUserID)
+	if _, err := b.MarkdownMessage(
+		player.User.TgUserID, langSet, "unioninvalid", nil,
+	); err != nil {
+		log.Println("ERROR:", err)
+	}
+}

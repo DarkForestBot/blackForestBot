@@ -225,6 +225,7 @@ func (p *Player) UnionValidation() bool {
 //UnionCorrection is
 func (p *Player) UnionCorrection() {
 	if !p.UnionValidation() {
+		UnionInvalidHint <- p
 		p.Ununion()
 	}
 }

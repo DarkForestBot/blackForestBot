@@ -43,6 +43,7 @@ trans:unionsuccess=[{{.Name}}](tg://user?id={{.TgUserID}}) 授受了你的邀请
 trans:unionfailed=结盟失败
 trans:unionhasone=你已经和 [{{.Name}}](tg://user?id={{.TgUserID}}) 结盟了
 trans:unionhint=现在你可以选择一个玩家结盟，你打算选谁呢？
+trans:unioninvalid=你白天可能是喝多了，结盟无效
 trans:operhint1=请选择你的操作\n数字是坐标的一个值，如果选择数字，要操作两次\n（听天由命：放弃本轮所有操作，等候命运宣判）
 trans:operhint2=好的，现在你可以选择坐标的第二个值，完成开枪动作。
 trans:operapproved=操作已提交
