@@ -644,12 +644,14 @@ func (g *Game) settleStageCheckDeath() {
 			}
 			player.User.ShootCount++
 		} else if player.Target != nil && !player.Target.Live {
-			op := g.findGlobalOperation(g.Round, player)
-			if op != nil {
-				op.AttachResult(operationResult{
-					Who:  player.Target,
-					None: true,
-				})
+			if player.Live {
+				op := g.findGlobalOperation(g.Round, player)
+				if op != nil {
+					op.AttachResult(operationResult{
+						Who:  player,
+						None: true,
+					})
+				}
 			}
 		}
 	}
