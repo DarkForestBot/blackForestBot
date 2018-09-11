@@ -420,9 +420,11 @@ func (g *Game) settleStageTag() {
 		switch operation.Action {
 		case Shoot: // Betray is special shoot
 			if operation.Target != nil && operation.Target.Player != nil {
+				operation.Player.ShootNoneStreak = 0
 				operation.Player.Target = operation.Target.Player
 			} else {
 				operation.Player.User.ShootCount++
+				operation.Player.ShootNoneStreak++
 				PlayerShootNothingHint <- operation.Player
 				op := g.findGlobalOperation(g.Round, operation.Player)
 				if op != nil {
@@ -434,6 +436,7 @@ func (g *Game) settleStageTag() {
 			}
 		case Abort:
 			rand.Seed(time.Now().Unix())
+			operation.Player.ShootNoneStreak = 0
 			if operation.Player.Status < PlayerStatusBeast {
 				fate := rand.Intn(4) // 1/n rate
 				if fate == 0 {
@@ -536,6 +539,7 @@ func (g *Game) settleStageCheckBetry() {
 					}
 					player.Kill(Trapped) // Oops! I was trapped!
 					player.User.KilledByTrapCount++
+					player.Target.ShootNoneStreak = 0
 				} else {
 					if player.Target.Live {
 						op := g.findGlobalOperation(g.Round, player)

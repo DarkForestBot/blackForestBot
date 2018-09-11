@@ -74,6 +74,7 @@ trans:shootnothing=你浪费了一发子弹，还引起了其他人的警觉。
 trans:eatnothing=你莽撞地冲了过去，失落而归。
 trans:shootsomething=你清楚的看见[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) 倒在了那里，你的枪下鬼又多了一个人。
 trans:eatsomething=[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) 的肉，似乎没有想像中的那么好吃
+trans:strikeout=三振出局！今晚你只能听天由命了……
 trans:achivementrewarded=恭喜你解锁成就：*{{.}}*!
 
 trans:achivement000=小试牛刀

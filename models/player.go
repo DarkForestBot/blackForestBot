@@ -11,17 +11,18 @@ import (
 
 //List of some consts
 const (
-	PlayerLive             = true
-	PlayerDead             = false
-	PlayerStatusNormal     = 0
-	PlayerStatusXExposed   = 1
-	PlayerStatusYExposed   = 2
-	PlayerStatusBeast      = 3
-	PlayerSetTrap          = true
-	PlayerUnsetTrap        = false
-	PlayerUnionBetrayed    = true
-	PlayerUnionNotBetrayed = !PlayerUnionBetrayed
-	PlayerShootNone        = -1
+	PlayerLive                 = true
+	PlayerDead                 = false
+	PlayerStatusNormal         = 0
+	PlayerStatusXExposed       = 1
+	PlayerStatusYExposed       = 2
+	PlayerStatusBeast          = 3
+	PlayerSetTrap              = true
+	PlayerUnsetTrap            = false
+	PlayerUnionBetrayed        = true
+	PlayerUnionNotBetrayed     = !PlayerUnionBetrayed
+	PlayerShootNone            = -1
+	PlayerShootNoneStreakLimit = 3
 )
 
 //PlayerKilledReason is
@@ -80,6 +81,7 @@ type Player struct {
 	Target                  *Player // Will kill whom
 	HintBeast               bool
 	CurrentGamePlayersCount int
+	ShootNoneStreak         int
 }
 
 //NewPlayer is called when start a game

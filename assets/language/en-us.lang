@@ -75,6 +75,7 @@ trans:shootnothing=You wasted a bullet.
 trans:eatnothing=You eat air.
 trans:shootsomething=You see [{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) was hit by you.
 trans:eatsomething=[{{.Target.User.Name}}](tg://user?id={{.Target.User.TgUserID}}) tastes so-so.
+trans:strikeout=Strikeout! your fate is suspended tonight.
 trans:achivementrewarded=Congratulations, you are rewarded achivement *{{.}}*!
 
 # TODO: if any good idea, just go ahead.
