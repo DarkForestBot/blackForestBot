@@ -335,7 +335,7 @@ func (b *Bot) onGameChangeToNightHint(game *models.Game) {
 	for _, player := range game.Players {
 		if player.Live {
 			langSet := getLang(player.User.TgUserID)
-			if player.ShootNoneStreak >= models.PlayerShootNoneStreakLimit {
+			if player.ShootNoneStreak+1 >= models.PlayerShootNoneStreakLimit {
 				if _, err := b.MarkdownMessage(
 					player.User.TgUserID, langSet, "strikeout", game,
 				); err != nil {
