@@ -297,7 +297,7 @@ func (b *Bot) onGameChangeToDayHint(game *models.Game) {
 			availList = append(availList, player)
 		}
 	}
-	if len(availList) == 0 {
+	if len(availList)-1 == 0 { //except self.
 		return
 	}
 	// send msg
