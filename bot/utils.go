@@ -194,7 +194,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 			report += "\n"
 			for _, r := range op.Result {
 				if r.Killed != "" {
-					if op.Action == models.Betray {
+					if r.Betray {
 						report += lang.T(langSet, "replay_betrayed", r)
 					} else {
 						report += lang.T(langSet, "replay_killed", r)

@@ -8,6 +8,7 @@ type operationResult struct {
 	BeBeast  bool
 	Survive  bool // for Abort
 	None     bool
+	Betray   bool
 }
 
 type globalOperation struct {

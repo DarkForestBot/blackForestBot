@@ -543,6 +543,7 @@ func (g *Game) settleStageCheckBetry() {
 							op.AttachResult(operationResult{
 								Who:    player,
 								Killed: player.Target.User.Name,
+								Betray: true,
 							})
 						}
 					}
