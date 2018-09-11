@@ -191,6 +191,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 			case models.Trap:
 				report += lang.T(langSet, "replay_trap", op)
 			}
+			report += "\n"
 			for _, r := range op.Result {
 				if r.Killed != "" {
 					if op.Action == models.Betray {
@@ -210,7 +211,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 				}
 				if r.None {
 					if r.Who != nil {
-						report += lang.T(langSet, "replay_none", op)
+						report += lang.T(langSet, "replay_none", r)
 					}
 				}
 			}

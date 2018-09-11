@@ -556,6 +556,9 @@ func (g *Game) settleStageCheckBetry() {
 
 func (g *Game) settleStageCheckDeath() {
 	for _, player := range g.Players {
+		if !player.Live && player.KilledReason == Trapped { // I was trapped, and dead now.
+			continue
+		}
 		if player.Target != nil && player.Target.Live { // I want to kill some one.
 			if player.Status >= PlayerStatusBeast { // I am a beast
 				if player.Target.Target == player { // Kill each other
