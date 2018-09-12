@@ -508,13 +508,15 @@ func (g *Game) settleStageCheckBetry() {
 			player.User.BetrayCount++
 			if player.Unioned.Target == player { // Betray each other
 				player.Unioned.User.BetrayCount++
-				if player.Status < PlayerStatusBeast {
-					op := g.findGlobalOperation(g.Round, player)
-					if op != nil {
+				op := g.findGlobalOperation(g.Round, player)
+				if op != nil {
+					if player.Status < PlayerStatusBeast {
 						op.AttachResult(operationResult{
 							Who:     player,
 							BeBeast: true,
 						})
+					}
+					if player.Unioned.Status < PlayerStatusBeast {
 						op.AttachResult(operationResult{
 							Who:     player.Unioned,
 							BeBeast: true,
