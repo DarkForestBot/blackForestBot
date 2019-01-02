@@ -57,4 +57,4 @@ Donation
 ----
 
 [Patreon](https://www.patreon.com/TonyChyi)
-[PayPal](paypal.me/tonychee7000)
+[PayPal](https://paypal.me/tonychee7000)
