@@ -159,7 +159,7 @@ func (b *Bot) startGameClearMessage(game *models.Game) {
 	)
 }
 
-func (b *Bot) makeReplay(game *models.Game) error {
+func (b *Bot) makeReplay(game *models.Game, requestUser int64) error {
 	langSet := getLang(game.TgGroup.TgGroupID)
 	var report = "#Replay\n"
 	for i, ops := range game.GlobalOperations {
@@ -223,7 +223,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 		}
 
 		if len(report) > 2048 {
-			msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+			msg := tgApi.NewMessage(requestUser, report)
 			msg.ParseMode = tgApi.ModeMarkdown
 			if _, err := b.Send(msg); err != nil {
 				return err
@@ -233,7 +233,7 @@ func (b *Bot) makeReplay(game *models.Game) error {
 			report += "--------\n"
 		}
 	}
-	msg := tgApi.NewMessage(game.TgGroup.TgGroupID, report)
+	msg := tgApi.NewMessage(requestUser, report)
 	msg.ParseMode = tgApi.ModeMarkdown
 	if _, err := b.Send(msg); err != nil {
 		return err

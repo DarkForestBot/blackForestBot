@@ -626,8 +626,10 @@ func (b *Bot) onGameLoseHint(game *models.Game) {
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
-	if err := b.makeReplay(game); err != nil {
-		log.Println("ERROR:", err)
+	for _, user := range game.Users {
+		if err := b.makeReplay(game, user.TgUserID); err != nil {
+			log.Println("ERROR:", err)
+		}
 	}
 }
 
@@ -642,8 +644,10 @@ func (b *Bot) onWinGameHint(game *models.Game) {
 	); err != nil {
 		log.Println("ERROR:", err)
 	}
-	if err := b.makeReplay(game); err != nil {
-		log.Println("ERROR:", err)
+	for _, user := range game.Users {
+		if err := b.makeReplay(game, user.TgUserID); err != nil {
+			log.Println("ERROR:", err)
+		}
 	}
 }
 
