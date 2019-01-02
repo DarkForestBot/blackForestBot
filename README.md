@@ -36,7 +36,7 @@ Configuraion File
 
 ```json
 {
-    "tgApiToken": "OMITTED",  // You may need one bot to run this.
+    "tgApiToken": "OMITTED",  // You may need a bot for this.
     "debug": true,
     "updateTimeout": 60,
     "database": "bl:bl@tcp(127.0.0.1:3306)/blackforest?charset=utf8mb4&parseTime=True",
@@ -56,7 +56,5 @@ Or you may use [official bot](https://t.me/dark_forest_game_bot)
 Donation
 ----
 
-![alipay](.readme/alipay.jpg)
-![wechat](.readme/wechat.jpg)
-
+[Patreon](https://www.patreon.com/TonyChyi)
 [PayPal](paypal.me/tonychee7000)
