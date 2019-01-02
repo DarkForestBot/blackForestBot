@@ -171,6 +171,10 @@ func onStartGame(msg *tgApi.Message, args ...string) error {
 		if err != nil {
 			return err
 		}
+		if user == nil || user.ID <= 0 {
+			RegisterNeededEvent <- msg
+		}
+
 		group, err := models.GetTgGroup(msg.Chat.ID)
 		if err != nil {
 			return err
